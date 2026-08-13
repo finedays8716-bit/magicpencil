@@ -45,13 +45,20 @@ function safeName(){return (document.querySelector('#artist').value.trim()||'이
 function applyMission(m){mission=m;let x=missions[m];document.querySelector('#title').textContent=x.title;document.querySelector('#guide').textContent=x.guide;bg.src=x.bg;document.querySelector('#magic').textContent=x.magic;document.querySelector('#loadingText').textContent=x.loading;document.querySelector('#resultTitle').textContent=x.result;document.querySelector('#deerTab').classList.toggle('active',m==='deer');document.querySelector('#bearTab').classList.toggle('active',m==='bear');document.querySelector('#otterTab').classList.toggle('active',m==='otter');resetDrawing();setupTrash();document.querySelector('#draw').style.display='block';document.querySelector('#result').style.display='none'}
 const trashFiles=['trash-bottle.png','trash-can.png','trash-bag.png','trash-cup.png','trash-wrapper.png','trash-box.png','trash-mask.png'];
 function makeTrashItems(){
- const zones=[[12,30],[35,29],[58,30],[82,31],[20,58],[48,57],[76,57]];
- return zones.map(p=>[
-   trashFiles[Math.floor(Math.random()*trashFiles.length)],
-   p[0]+(Math.random()*6-3),
-   p[1]+(Math.random()*6-3),
-   Math.round(Math.random()*30-15)
- ]);
+ const items=[], minDist=16;
+ // 강이 보이는 영역 안에서 매번 완전히 새 좌표를 뽑되 서로 너무 붙지 않게 함
+ while(items.length<7){
+   const x=10+Math.random()*80;   // 화면 가로 10~90%
+   const y=27+Math.random()*43;   // 강 주변 세로 27~70%
+   const farEnough=items.every(t=>Math.hypot(x-t[1],y-t[2])>=minDist);
+   if(farEnough){
+     items.push([
+       trashFiles[Math.floor(Math.random()*trashFiles.length)],
+       x,y,Math.round(Math.random()*40-20)
+     ]);
+   }
+ }
+ return items;
 }
 let trashItems=makeTrashItems();let trashLeft=0;
 function setupTrash(){const l=document.querySelector('#trashLayer'),n=document.querySelector('#trashCount');l.innerHTML='';if(mission!=='otter'){n.style.display='none';c.style.pointerEvents='auto';return}trashItems=makeTrashItems();trashLeft=7;n.style.display='block';c.style.pointerEvents='none';countTrash();trashItems.forEach(t=>{let im=document.createElement('img');im.className='trash';im.src=t[0];im.style.setProperty('left',t[1]+'%','important');im.style.setProperty('top',t[2]+'%','important');im.style.setProperty('right','auto','important');im.style.setProperty('bottom','auto','important');im.style.transform=`translate(-50%,-50%) rotate(${t[3]}deg)`;im.onclick=()=>{if(im.classList.contains('gone'))return;im.classList.add('gone');trashLeft--;countTrash();if(!trashLeft)setTimeout(()=>{document.querySelector('#guide').textContent='쓰레기를 모두 치웠어요! 이제 마술연필로 수달이 살기 좋은 강을 그려 주세요.';n.textContent='✨ 쓰레기를 모두 치웠어요!';c.style.pointerEvents='auto'},250)};l.appendChild(im)})}
