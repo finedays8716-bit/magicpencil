@@ -1,5 +1,9 @@
 {
   "name": "magicpencil",
+  "version": "1.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "form-data": "^4.0.4"
+  }
 }
