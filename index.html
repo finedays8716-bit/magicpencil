@@ -17,12 +17,12 @@
 .magic{background:#ffe36e!important;font-weight:800}.result{display:none;text-align:center}.result img{width:100%;border-radius:22px}
 .loading{display:none;position:absolute;inset:0;background:#fff9;z-index:4;place-items:center;font-size:30px;font-weight:800}
 .spark{animation:pulse 1s infinite}@keyframes pulse{50%{transform:scale(1.08)}}.nav button.active{background:#ffe36e;font-weight:800}
-</style></head>
+.trashLayer{position:absolute;inset:0;z-index:2;pointer-events:none}.trash{position:absolute;width:12%;max-width:145px;cursor:pointer;pointer-events:auto;filter:drop-shadow(0 3px 3px #0004);transition:.25s}.trash.gone{transform:scale(.15)!important;opacity:0;pointer-events:none}.trashCount{position:absolute;right:14px;top:12px;z-index:3;background:#fffde8e8;border-radius:18px;padding:8px 13px;font-weight:800;display:none}</style></head>
 <body><main class="app">
-<div class="nav"><button id="deerTab" class="active">🦌 노루</button><button id="bearTab">🐻 반달가슴곰</button></div>
+<div class="nav"><button id="deerTab" class="active">🦌 노루</button><button id="bearTab">🐻 반달가슴곰</button><button id="otterTab">🦦 수달</button></div>
 <section class="top"><h1 id="title"></h1><p id="guide"></p></section>
 <div class="namebox">✏️ 그린 사람 <input id="artist" placeholder="이름을 써 주세요" maxlength="20"></div>
-<section id="draw"><div class="stage"><img id="bg"><canvas id="c"></canvas>
+<section id="draw"><div class="stage"><img id="bg"><div id="trashLayer" class="trashLayer"></div><div id="trashCount" class="trashCount"></div><canvas id="c"></canvas>
 <div class="loading" id="loading"><div class="spark" id="loadingText"></div></div></div>
 <div class="tools">
 <span class="swatch" data-c="#2e7d32" style="background:#2e7d32"></span><span class="swatch" data-c="#66bb6a" style="background:#66bb6a"></span>
@@ -36,12 +36,16 @@
 <script>
 const missions={
  deer:{label:'노루',title:'🌳 마술연필로 노루의 숲을 살려주세요!',guide:'나무와 풀, 꽃을 마음껏 그려 주세요.',bg:'forest-base.png',magic:'✨ 숲을 살려주세요!',loading:'✨ 마술연필이 숲을 살리고 있어요…',result:'🦌 노루가 활짝 웃어요!'},
+ otter:{label:'수달',title:'🦦 수달의 강을 도와주세요!',guide:'강에 있는 쓰레기를 모두 찾아 눌러 주세요.',bg:'otter-base.png',magic:'✨ 수달의 강을 살려주세요!',loading:'✨ 마술연필이 수달의 강을 살리고 있어요…',result:'🦦 수달이 깨끗한 강에서 활짝 웃어요!'},
  bear:{label:'반달가슴곰',title:'🐻 마술연필로 반달가슴곰을 지켜주세요!',guide:'반달가슴곰이 안전할 수 있도록 마음껏 그려 주세요.',bg:'bear-base.png',magic:'✨ 반달가슴곰을 지켜주세요!',loading:'✨ 마술연필이 곰을 지켜주고 있어요…',result:'🐻 반달가슴곰이 이제 안전해요!'}
 };
 let mission='deer',color='#2e7d32',drawing=false,history=[];
 const c=document.querySelector('#c'),ctx=c.getContext('2d'),bg=document.querySelector('#bg');
 function safeName(){return (document.querySelector('#artist').value.trim()||'이름없음').replace(/[\\/:*?"<>|]/g,'_')}
-function applyMission(m){mission=m;let x=missions[m];document.querySelector('#title').textContent=x.title;document.querySelector('#guide').textContent=x.guide;bg.src=x.bg;document.querySelector('#magic').textContent=x.magic;document.querySelector('#loadingText').textContent=x.loading;document.querySelector('#resultTitle').textContent=x.result;document.querySelector('#deerTab').classList.toggle('active',m==='deer');document.querySelector('#bearTab').classList.toggle('active',m==='bear');resetDrawing();document.querySelector('#draw').style.display='block';document.querySelector('#result').style.display='none'}
+function applyMission(m){mission=m;let x=missions[m];document.querySelector('#title').textContent=x.title;document.querySelector('#guide').textContent=x.guide;bg.src=x.bg;document.querySelector('#magic').textContent=x.magic;document.querySelector('#loadingText').textContent=x.loading;document.querySelector('#resultTitle').textContent=x.result;document.querySelector('#deerTab').classList.toggle('active',m==='deer');document.querySelector('#bearTab').classList.toggle('active',m==='bear');document.querySelector('#otterTab').classList.toggle('active',m==='otter');resetDrawing();setupTrash();document.querySelector('#draw').style.display='block';document.querySelector('#result').style.display='none'}
+const trashItems=[['trash-bottle.png',13,58,-14],['trash-can.png',72,63,16],['trash-bag.png',56,35,-8],['trash-wrapper.png',34,68,10],['trash-box.png',78,39,-7]];let trashLeft=0;
+function setupTrash(){const l=document.querySelector('#trashLayer'),n=document.querySelector('#trashCount');l.innerHTML='';if(mission!=='otter'){n.style.display='none';c.style.pointerEvents='auto';return}trashLeft=5;n.style.display='block';c.style.pointerEvents='none';countTrash();trashItems.forEach(t=>{let im=document.createElement('img');im.className='trash';im.src=t[0];im.style.left=t[1]+'%';im.style.top=t[2]+'%';im.style.transform=`rotate(${t[3]}deg)`;im.onclick=()=>{if(im.classList.contains('gone'))return;im.classList.add('gone');trashLeft--;countTrash();if(!trashLeft)setTimeout(()=>{document.querySelector('#guide').textContent='쓰레기를 모두 치웠어요! 이제 마술연필로 수달이 살기 좋은 강을 그려 주세요.';n.textContent='✨ 쓰레기를 모두 치웠어요!';c.style.pointerEvents='auto'},250)};l.appendChild(im)})}
+function countTrash(){document.querySelector('#trashCount').textContent=`🗑️ 남은 쓰레기 ${trashLeft}개`}
 function resize(){const r=c.getBoundingClientRect();c.width=Math.round(r.width*devicePixelRatio);c.height=Math.round(r.height*devicePixelRatio);ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
 addEventListener('resize',resize);resize();
 function pos(e){const r=c.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]}
@@ -67,6 +71,6 @@ async function aiTransportDataUrl(){
 function downloadData(data,name){let a=document.createElement('a');a.href=data;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 document.querySelector('#downChild').onclick=async()=>downloadData(await compositeDataUrl(),`${safeName()}_${missions[mission].label}_내그림.png`);
 document.querySelector('#downAI').onclick=()=>{let d=document.querySelector('#out').src;if(d)downloadData(d,`${safeName()}_${missions[mission].label}_AI완성.png`)};
-document.querySelector('#magic').onclick=async()=>{let loading=document.querySelector('#loading');loading.style.display='grid';try{let dataUrl=await aiTransportDataUrl();let rr=await fetch('/api/magic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl,mission})});let j=await rr.json();if(!rr.ok)throw Error(j.error||'실패');document.querySelector('#out').src=j.image;document.querySelector('#draw').style.display='none';document.querySelector('#result').style.display='block'}catch(e){alert('AI 변환에 실패했어요.\\n'+e.message)}finally{loading.style.display='none'}};
-document.querySelector('#again').onclick=()=>applyMission(mission);document.querySelector('#deerTab').onclick=()=>applyMission('deer');document.querySelector('#bearTab').onclick=()=>applyMission('bear');applyMission('deer');
+document.querySelector('#magic').onclick=async()=>{if(mission==='otter'&&trashLeft){alert('먼저 쓰레기를 모두 눌러 치워 주세요!');return}let loading=document.querySelector('#loading');loading.style.display='grid';try{let dataUrl=await aiTransportDataUrl();let rr=await fetch('/api/magic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl,mission})});let j=await rr.json();if(!rr.ok)throw Error(j.error||'실패');document.querySelector('#out').src=j.image;document.querySelector('#draw').style.display='none';document.querySelector('#result').style.display='block'}catch(e){alert('AI 변환에 실패했어요.\\n'+e.message)}finally{loading.style.display='none'}};
+document.querySelector('#again').onclick=()=>applyMission(mission);document.querySelector('#deerTab').onclick=()=>applyMission('deer');document.querySelector('#bearTab').onclick=()=>applyMission('bear');document.querySelector('#otterTab').onclick=()=>applyMission('otter');applyMission('deer');
 </script></body></html>
