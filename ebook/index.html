@@ -1,88 +1,52 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>꼬마곰의 마술연필 이야기책</title>
-<style>
-*{box-sizing:border-box} body{margin:0;background:#fff8e9;color:#3b3025;font-family:system-ui,"Noto Sans KR",sans-serif}
-.wrap{max-width:1200px;margin:auto;padding:18px}.head{text-align:center}.head h1{margin:5px;font-size:clamp(25px,3vw,40px)}
-.head p{margin:7px 0 16px}.toolbar,.pagebar{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:12px 0}
-button,.filebtn{border:0;background:#fff;padding:11px 16px;border-radius:15px;box-shadow:0 2px 9px #0002;font-weight:750;font-size:16px;cursor:pointer}
-.primary{background:#ffe36e}.danger{color:#a00}.editor{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:16px}
-.canvasWrap{background:#fff;border-radius:20px;box-shadow:0 5px 20px #0002;padding:10px}
-.page{position:relative;aspect-ratio:16/9;overflow:hidden;background:white;border-radius:13px}
-.page .photo{width:100%;height:100%;object-fit:contain;display:block}
-.overlay{position:absolute;left:12%;top:12%;min-width:90px;max-width:55%;padding:9px 13px;cursor:move;user-select:none;white-space:pre-wrap}
-.overlay.text{font-size:28px;font-weight:750;text-shadow:0 1px 2px white}
-.overlay.bubble{background:white;border:3px solid #42382e;border-radius:26px;font-size:24px;font-weight:700;padding:14px 18px}
-.overlay.selected{outline:3px dashed #f2b600}.side{background:#fff;border-radius:18px;padding:15px;box-shadow:0 5px 20px #0001}
-.side label{display:block;font-weight:800;margin:9px 0 5px}.side input,.side textarea{width:100%;padding:10px;border:2px solid #ddd0a4;border-radius:11px;font-size:16px}
-.side input[type=range]{padding:0}.thumbs{display:flex;gap:8px;overflow:auto;padding:8px 2px}.thumb{flex:0 0 112px;background:#fff;border:3px solid transparent;border-radius:12px;padding:5px;cursor:pointer;text-align:center}
-.thumb.active{border-color:#f1c83d}.thumb img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:7px;background:#eee}.thumb small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.viewer{display:none}.book{max-width:1100px;margin:auto;background:white;border-radius:22px;box-shadow:0 8px 30px #0002;overflow:hidden}
-.bookPage{position:relative;aspect-ratio:16/9;background:white}.bookPage img{width:100%;height:100%;object-fit:contain}
-.endText{position:absolute;left:8%;right:8%;bottom:5%;background:#fffffff0;border-radius:18px;padding:14px;text-align:center;font-size:clamp(19px,2.3vw,32px);font-weight:900}
-.nav{display:flex;justify-content:center;align-items:center;gap:12px;padding:14px}.counter{font-weight:800}
-@media(max-width:800px){.editor{grid-template-columns:1fr}.side{order:-1}.overlay.text{font-size:20px}.overlay.bubble{font-size:18px}}
-</style>
-</head>
-<body>
-<div class="wrap" id="editMode">
-  <div class="head"><h1>📖 우리들의 마술연필 이야기책</h1><p>아이들의 완성 그림을 올리고, 말풍선과 글자를 넣어 E북을 만들어 보세요.</p></div>
-  <div class="toolbar">
-    <label class="filebtn">🖼️ 그림 추가<input id="files" type="file" accept="image/*" multiple hidden></label>
-    <button id="addText">✏️ 글자 넣기</button><button id="addBubble">💬 말풍선 넣기</button>
-    <button id="deleteObj" class="danger">선택 요소 삭제</button><button id="deletePage" class="danger">현재 페이지 삭제</button>
-    <button id="preview" class="primary">📖 완성된 E북 보기</button>
-  </div>
-  <div class="thumbs" id="thumbs"></div>
-  <div class="editor">
-    <div class="canvasWrap"><div class="page" id="page"><img class="photo" id="photo"></div></div>
-    <aside class="side">
-      <label>이름 / 페이지 제목</label><input id="caption" placeholder="예: 민지의 노루 숲">
-      <label>선택한 글 내용</label><textarea id="content" rows="4" placeholder="글자나 말풍선을 선택해 수정하세요."></textarea>
-      <label>글자 크기</label><input id="fontSize" type="range" min="16" max="52" value="28">
-      <p style="font-size:13px;line-height:1.55">말풍선과 글자는 마우스나 손가락으로 끌어서 위치를 옮길 수 있습니다. 작업 내용은 이 브라우저에 자동 저장됩니다.</p>
-    </aside>
-  </div>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마술연필 E북 만들기</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f7f0df;color:#352d25;font-family:system-ui,"Noto Sans KR",sans-serif}.wrap{max-width:1280px;margin:auto;padding:18px}
+h1{text-align:center;margin:6px}.sub{text-align:center;margin:6px 0 18px}.card{background:white;border-radius:20px;padding:16px;box-shadow:0 5px 20px #0001;margin-bottom:14px}
+.row,.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center}button,.file{border:0;border-radius:14px;background:white;box-shadow:0 2px 9px #0002;padding:11px 15px;font-size:16px;font-weight:800;cursor:pointer}.yellow{background:#ffe16a}.danger{color:#a11}
+input[type=text]{padding:10px 12px;border:2px solid #ded1ad;border-radius:11px;font-size:16px}.list{display:grid;gap:10px}.work{display:grid;grid-template-columns:110px 1fr auto;gap:12px;align-items:center;border:2px solid #eee2c6;border-radius:16px;padding:10px}.pair{display:flex;gap:8px}.mini{width:110px;aspect-ratio:3/2;object-fit:cover;border-radius:9px;background:#eee}.label{font-size:13px;text-align:center}.bookArea{display:none}
+.bookShell{max-width:1180px;margin:20px auto;perspective:1600px}.spread{position:relative;aspect-ratio:3/2;background:white;border-radius:10px 18px 18px 10px;overflow:hidden;box-shadow:0 18px 45px #5d4a2b44,0 3px 8px #0002}
+.spread:after{content:"";position:absolute;top:0;bottom:0;left:50%;width:34px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,#00000018 42%,#fff8 50%,#00000018 58%,transparent);pointer-events:none}
+.spread img{width:100%;height:100%;object-fit:contain;background:#fff}.coverSpread{background:transparent;box-shadow:none;display:flex;justify-content:center}.coverSpread img{height:100%;width:auto;max-width:50%;object-fit:contain;box-shadow:0 14px 35px #0003;border-radius:5px 15px 15px 5px}
+.overlay{position:absolute;left:15%;top:15%;max-width:55%;padding:10px 14px;cursor:move;white-space:pre-wrap;z-index:3}.text{font-size:28px;font-weight:800;text-shadow:0 1px 2px white}.bubble{font-size:24px;font-weight:750;background:white;border:3px solid #3c342c;border-radius:28px}
+.editor{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.editCanvas{position:relative;aspect-ratio:3/2;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 18px #0002}.editCanvas img{width:100%;height:100%;object-fit:contain}.side textarea{width:100%;min-height:90px;padding:9px;border:2px solid #ded1ad;border-radius:10px}.side label{display:block;font-weight:800;margin:9px 0 5px}.selected{outline:3px dashed #eab800}
+.nav{text-align:center;margin:12px}.nav span{display:inline-block;min-width:90px;font-weight:850}@media(max-width:760px){.editor{grid-template-columns:1fr}.work{grid-template-columns:1fr}.coverSpread img{max-width:60%}}
+</style></head><body><div class="wrap" id="maker">
+<h1>📖 마술연필 E북 만들기</h1><p class="sub">표지와 마지막 장면은 직접 올리고, 아이 작품은 원본 → AI 완성 순서로 보여줍니다.</p>
+<div class="card"><div class="row">
+<label class="file">📕 표지 올리기<input id="coverFile" type=file accept="image/*" hidden></label><span id="coverName">표지 없음</span>
+<label class="file">🏁 마지막 페이지 올리기<input id="endFile" type=file accept="image/*" hidden></label><span id="endName">마지막 페이지 없음</span>
+</div></div>
+<div class="card"><div class="row"><input id="kidName" type=text placeholder="아이 이름">
+<label class="file">✏️ 아이 원본<input id="originalFile" type=file accept="image/*" hidden></label><span id="originalName">선택 안 됨</span>
+<label class="file">✨ AI 완성<input id="aiFile" type=file accept="image/*" hidden></label><span id="aiName">선택 안 됨</span>
+<button id="addWork" class="yellow">＋ 작품 추가</button></div></div>
+<div class="card"><b>작품 순서</b><div class="list" id="list"></div></div>
+<div class="tools"><button id="preview" class="yellow">📖 완성된 E북 보기</button><button id="clearAll" class="danger">전체 초기화</button></div>
 </div>
-
-<div class="wrap viewer" id="viewMode">
- <div class="book"><div class="bookPage" id="bookPage"></div>
- <div class="nav"><button id="prev">〈 이전</button><span class="counter" id="counter"></span><button id="next">다음 〉</button></div></div>
- <div class="toolbar"><button id="backEdit">✏️ 편집으로 돌아가기</button></div>
-</div>
-
+<div class="wrap bookArea" id="book"><div class="bookShell"><div class="spread" id="spread"></div></div><div class="nav"><button id="prev">〈 이전</button><span id="count"></span><button id="next">다음 〉</button></div><div class="tools" style="justify-content:center"><button id="editBack">✏️ 편집으로 돌아가기</button><button id="decorate">💬 현재 작품 꾸미기</button></div></div>
+<div class="wrap bookArea" id="decorator"><h1>페이지 꾸미기</h1><div class="editor"><div class="editCanvas" id="editCanvas"></div><div class="card side">
+<button id="addText">✏️ 글자 추가</button> <button id="addBubble">💬 말풍선 추가</button>
+<label>선택한 내용</label><textarea id="txt"></textarea><label>글자 크기</label><input id="size" type=range min=16 max=52 value=28 style="width:100%">
+<button id="delObj" class="danger">선택 요소 삭제</button><p style="font-size:13px">글자와 말풍선은 끌어서 위치를 옮길 수 있습니다.</p></div></div><div class="tools" style="justify-content:center"><button id="doneDecor" class="yellow">완료</button></div></div>
 <script>
-let pages=JSON.parse(localStorage.getItem('magicEbookPages')||'[]'), current=0, selected=null, viewIndex=0;
-const pageEl=document.querySelector('#page'), photo=document.querySelector('#photo'), thumbs=document.querySelector('#thumbs');
-const save=()=>localStorage.setItem('magicEbookPages',JSON.stringify(pages));
-function esc(s){return (s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function ensure(){if(!pages.length) pages.push({img:'',caption:'',items:[]})}
-function render(){
- ensure(); let p=pages[current]; photo.src=p.img||''; document.querySelector('#caption').value=p.caption||''; selected=null;
- pageEl.querySelectorAll('.overlay').forEach(x=>x.remove());
- p.items.forEach((it,i)=>{let d=document.createElement('div');d.className='overlay '+it.type;d.textContent=it.text;d.style.left=it.x+'%';d.style.top=it.y+'%';d.style.fontSize=it.size+'px';d.dataset.i=i;drag(d);d.onclick=e=>{e.stopPropagation();select(d)};pageEl.appendChild(d)});
- renderThumbs(); save();
-}
-function renderThumbs(){thumbs.innerHTML='';pages.forEach((p,i)=>{let d=document.createElement('div');d.className='thumb '+(i===current?'active':'');d.innerHTML=`<img src="${p.img||''}"><small>${esc(p.caption||('페이지 '+(i+1)))}</small>`;d.onclick=()=>{current=i;render()};thumbs.appendChild(d)})}
-function select(d){pageEl.querySelectorAll('.overlay').forEach(x=>x.classList.remove('selected'));selected=d;d.classList.add('selected');let it=pages[current].items[+d.dataset.i];document.querySelector('#content').value=it.text;document.querySelector('#fontSize').value=it.size}
-function add(type){let text=type==='bubble'?'고마워!':'이야기를 써 주세요.';pages[current].items.push({type,text,x:15,y:15,size:type==='bubble'?24:28});render();select(pageEl.querySelectorAll('.overlay')[pages[current].items.length-1])}
-function drag(el){let sx,sy,ox,oy,go=false;el.onpointerdown=e=>{go=true;el.setPointerCapture(e.pointerId);sx=e.clientX;sy=e.clientY;ox=parseFloat(el.style.left);oy=parseFloat(el.style.top);select(el)};el.onpointermove=e=>{if(!go)return;let r=pageEl.getBoundingClientRect();let x=Math.max(0,Math.min(88,ox+(e.clientX-sx)/r.width*100)),y=Math.max(0,Math.min(88,oy+(e.clientY-sy)/r.height*100));el.style.left=x+'%';el.style.top=y+'%'};el.onpointerup=()=>{if(!go)return;go=false;let it=pages[current].items[+el.dataset.i];it.x=parseFloat(el.style.left);it.y=parseFloat(el.style.top);save()}}
-document.querySelector('#files').onchange=e=>{[...e.target.files].forEach(f=>{let r=new FileReader();r.onload=()=>{if(pages.length===1&&!pages[0].img&&!pages[0].items.length)pages=[];pages.push({img:r.result,caption:'',items:[]});current=pages.length-1;render()};r.readAsDataURL(f)})};
-document.querySelector('#addText').onclick=()=>add('text');document.querySelector('#addBubble').onclick=()=>add('bubble');
-document.querySelector('#caption').oninput=e=>{pages[current].caption=e.target.value;renderThumbs();save()};
-document.querySelector('#content').oninput=e=>{if(!selected)return;let it=pages[current].items[+selected.dataset.i];it.text=e.target.value;selected.textContent=it.text;save()};
-document.querySelector('#fontSize').oninput=e=>{if(!selected)return;let it=pages[current].items[+selected.dataset.i];it.size=+e.target.value;selected.style.fontSize=it.size+'px';save()};
-document.querySelector('#deleteObj').onclick=()=>{if(!selected)return;pages[current].items.splice(+selected.dataset.i,1);render()};
-document.querySelector('#deletePage').onclick=()=>{if(!pages.length)return;if(confirm('현재 페이지를 삭제할까요?')){pages.splice(current,1);current=Math.max(0,Math.min(current,pages.length-1));render()}};
-pageEl.onclick=()=>{selected=null;pageEl.querySelectorAll('.overlay').forEach(x=>x.classList.remove('selected'))};
-function viewerPages(){return pages.filter(p=>p.img).concat([{ending:true,img:'ending.png',caption:'꼬마곰 덕분에 동물 친구들은 행복하게 살게 되었답니다!',items:[]}])}
-function showBook(){let a=viewerPages(),p=a[viewIndex],b=document.querySelector('#bookPage');b.innerHTML=`<img src="${p.img}">`;(p.items||[]).forEach(it=>{let d=document.createElement('div');d.className='overlay '+it.type;d.textContent=it.text;d.style.left=it.x+'%';d.style.top=it.y+'%';d.style.fontSize=it.size+'px';b.appendChild(d)});if(p.caption){let d=document.createElement('div');d.className=p.ending?'endText':'endText';d.textContent=p.caption;b.appendChild(d)}document.querySelector('#counter').textContent=`${viewIndex+1} / ${a.length}`;document.querySelector('#prev').disabled=viewIndex===0;document.querySelector('#next').disabled=viewIndex===a.length-1}
-document.querySelector('#preview').onclick=()=>{viewIndex=0;document.querySelector('#editMode').style.display='none';document.querySelector('#viewMode').style.display='block';showBook()};
-document.querySelector('#backEdit').onclick=()=>{document.querySelector('#viewMode').style.display='none';document.querySelector('#editMode').style.display='block'};
-document.querySelector('#prev').onclick=()=>{if(viewIndex>0){viewIndex--;showBook()}};document.querySelector('#next').onclick=()=>{if(viewIndex<viewerPages().length-1){viewIndex++;showBook()}};
-render();
-</script>
-</body></html>
+let data=JSON.parse(localStorage.getItem('magicEbookV2')||'{"cover":"","end":"","works":[]}'), tmpO='',tmpA='',bookPages=[],idx=0,selected=null,decorPage=null;
+const save=()=>localStorage.setItem('magicEbookV2',JSON.stringify(data)), read=(f,cb)=>{let r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(f)};
+function bindFile(id,fn,nameId){document.querySelector(id).onchange=e=>{let f=e.target.files[0];if(!f)return;document.querySelector(nameId).textContent=f.name;read(f,fn)}}
+bindFile('#coverFile',v=>{data.cover=v;save()},'#coverName');bindFile('#endFile',v=>{data.end=v;save()},'#endName');bindFile('#originalFile',v=>tmpO=v,'#originalName');bindFile('#aiFile',v=>tmpA=v,'#aiName');
+document.querySelector('#addWork').onclick=()=>{let n=document.querySelector('#kidName').value.trim();if(!tmpO||!tmpA)return alert('아이 원본과 AI 완성 그림을 모두 선택해 주세요.');data.works.push({name:n,original:tmpO,ai:tmpA,originalItems:[],aiItems:[]});tmpO=tmpA='';document.querySelector('#kidName').value='';document.querySelector('#originalName').textContent='선택 안 됨';document.querySelector('#aiName').textContent='선택 안 됨';save();renderList()};
+function renderList(){let l=document.querySelector('#list');l.innerHTML='';data.works.forEach((w,i)=>{let d=document.createElement('div');d.className='work';d.innerHTML=`<b>${i+1}. ${w.name||'이름 없음'}</b><div class=pair><div><img class=mini src="${w.original}"><div class=label>원본</div></div><div><img class=mini src="${w.ai}"><div class=label>AI 완성</div></div></div><div><button data-up="${i}">↑</button><button data-down="${i}">↓</button><button class=danger data-del="${i}">삭제</button></div>`;l.appendChild(d)});l.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>move(+b.dataset.up,-1));l.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>move(+b.dataset.down,1));l.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{data.works.splice(+b.dataset.del,1);save();renderList()})}
+function move(i,d){let j=i+d;if(j<0||j>=data.works.length)return;[data.works[i],data.works[j]]=[data.works[j],data.works[i]];save();renderList()}
+function build(){bookPages=[];if(data.cover)bookPages.push({kind:'cover',img:data.cover,items:[]});data.works.forEach((w,wi)=>{bookPages.push({kind:'original',img:w.original,items:w.originalItems,wi});bookPages.push({kind:'ai',img:w.ai,items:w.aiItems,wi})});if(data.end)bookPages.push({kind:'end',img:data.end,items:[]})}
+function overlayHtml(it){return `<div class="overlay ${it.type}" style="left:${it.x}%;top:${it.y}%;font-size:${it.size}px">${it.text.replace(/</g,'&lt;')}</div>`}
+function show(){build();if(!bookPages.length)return;idx=Math.min(idx,bookPages.length-1);let p=bookPages[idx],s=document.querySelector('#spread');s.className='spread '+(p.kind==='cover'?'coverSpread':'');s.innerHTML=`<img src="${p.img}">`+(p.items||[]).map(overlayHtml).join('');document.querySelector('#count').textContent=`${idx+1} / ${bookPages.length}`;document.querySelector('#prev').disabled=idx===0;document.querySelector('#next').disabled=idx===bookPages.length-1;document.querySelector('#decorate').style.display=(p.kind==='original'||p.kind==='ai')?'inline-block':'none'}
+document.querySelector('#preview').onclick=()=>{if(!data.cover)return alert('표지를 먼저 올려 주세요.');idx=0;document.querySelector('#maker').style.display='none';document.querySelector('#book').style.display='block';show()};document.querySelector('#prev').onclick=()=>{if(idx){idx--;show()}};document.querySelector('#next').onclick=()=>{if(idx<bookPages.length-1){idx++;show()}};document.querySelector('#editBack').onclick=()=>{document.querySelector('#book').style.display='none';document.querySelector('#maker').style.display='block'};
+document.querySelector('#clearAll').onclick=()=>{if(confirm('E북 작업을 모두 지울까요?')){localStorage.removeItem('magicEbookV2');location.reload()}};
+function renderDecor(){let c=document.querySelector('#editCanvas');c.innerHTML=`<img src="${decorPage.img}">`;selected=null;(decorPage.items||[]).forEach((it,i)=>{let d=document.createElement('div');d.className='overlay '+it.type;d.style.left=it.x+'%';d.style.top=it.y+'%';d.style.fontSize=it.size+'px';d.textContent=it.text;d.dataset.i=i;drag(d);d.onclick=e=>{e.stopPropagation();select(d)};c.appendChild(d)})}
+function select(d){document.querySelectorAll('#editCanvas .overlay').forEach(x=>x.classList.remove('selected'));selected=d;d.classList.add('selected');let it=decorPage.items[+d.dataset.i];document.querySelector('#txt').value=it.text;document.querySelector('#size').value=it.size}
+function add(type){decorPage.items.push({type,text:type==='bubble'?'고마워!':'글자를 써 주세요.',x:15,y:15,size:type==='bubble'?24:28});renderDecor()}
+function drag(el){let go=false,sx,sy,ox,oy;el.onpointerdown=e=>{go=true;el.setPointerCapture(e.pointerId);sx=e.clientX;sy=e.clientY;ox=parseFloat(el.style.left);oy=parseFloat(el.style.top);select(el)};el.onpointermove=e=>{if(!go)return;let r=document.querySelector('#editCanvas').getBoundingClientRect();el.style.left=Math.max(0,Math.min(88,ox+(e.clientX-sx)/r.width*100))+'%';el.style.top=Math.max(0,Math.min(88,oy+(e.clientY-sy)/r.height*100))+'%'};el.onpointerup=()=>{if(!go)return;go=false;let it=decorPage.items[+el.dataset.i];it.x=parseFloat(el.style.left);it.y=parseFloat(el.style.top);save()}}
+document.querySelector('#decorate').onclick=()=>{decorPage=bookPages[idx];document.querySelector('#book').style.display='none';document.querySelector('#decorator').style.display='block';renderDecor()};document.querySelector('#addText').onclick=()=>add('text');document.querySelector('#addBubble').onclick=()=>add('bubble');
+document.querySelector('#txt').oninput=e=>{if(!selected)return;let it=decorPage.items[+selected.dataset.i];it.text=e.target.value;selected.textContent=it.text;save()};document.querySelector('#size').oninput=e=>{if(!selected)return;let it=decorPage.items[+selected.dataset.i];it.size=+e.target.value;selected.style.fontSize=it.size+'px';save()};
+document.querySelector('#delObj').onclick=()=>{if(!selected)return;decorPage.items.splice(+selected.dataset.i,1);renderDecor();save()};document.querySelector('#doneDecor').onclick=()=>{save();document.querySelector('#decorator').style.display='none';document.querySelector('#book').style.display='block';show()};
+renderList();
+</script></body></html>
