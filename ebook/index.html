@@ -20,7 +20,7 @@ input[type=text],textarea{padding:10px;border:2px solid #ded1ad;border-radius:10
 <div class=card><h3>＋ 아이 작품 추가</h3><div class=row><input id=name type=text placeholder="아이 이름"><label class=file>✏️ 원본 그림 선택<input id=orig type=file accept="image/*" hidden></label><span id=origTxt>선택 안 됨</span><label class=file>✨ AI 그림 선택<input id=ai type=file accept="image/*" hidden></label><span id=aiTxt>선택 안 됨</span><button class=primary id=add>＋ 작품 추가</button></div></div>
 <div class=card><h3>📑 페이지 구성 <span id="workCount" style="font-size:14px;color:#8a6d00"></span> <small>— 🔒 이야기 장면은 고정입니다. 아이 작품은 각 동물 이야기 사이에 추가할 수 있습니다.</small></h3><div id=list class=pages></div></div>
 <div class=card><h3>💬 선택한 페이지 꾸미기</h3><div class=tools><button id=editOrig>✏️ 원본에 글자/말풍선 넣기</button><button id=editAi>✨ AI 그림에 글자/말풍선 넣기</button></div><small>고정 페이지 또는 아이 작품을 선택한 뒤 편집해 주세요.</small></div>
-<div class=card style="font-size:13px;line-height:1.6"><b>ℹ️ 제작 안내</b><br>본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools><button class=primary id=preview>📖 완성된 E북 보기</button><button class=danger id=reset>전체 초기화</button></div></div>
+<div class=card style="font-size:13px;line-height:1.6"><b>ℹ️ 제작 안내</b><br>본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools><button class=primary id=preview>📖 완성된 E북 보기</button><button class=primary id=publish>📤 학부모용 E북 게시파일 만들기</button><button class=danger id=reset>전체 초기화</button></div></div>
 
 <div class="wrap book" id=book><div class=shell><div id=spread class=spread></div></div><div class=nav><button id=prev>〈 이전</button><span id=count></span><button id=next>다음 〉</button></div><div style="max-width:900px;margin:8px auto 0;text-align:center;font-size:12px;color:#666;line-height:1.5">본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools style="justify-content:center"><button id=back>✏️ 편집으로 돌아가기</button></div></div>
 
@@ -82,6 +82,35 @@ $('#done').onclick=()=>{$('#decor').style.display='none';$('#maker').style.displ
 function buildBook(){bookPages=[];if(data.cover)bookPages.push({kind:'cover',img:data.cover,items:[]});data.entries.forEach(e=>{if(e.type==='general')bookPages.push({kind:'page',img:e.img,items:e.items||[]});else{bookPages.push({kind:'page',img:e.original,items:e.originalItems||[]});bookPages.push({kind:'page',img:e.ai,items:e.aiItems||[]})}});if(data.end)bookPages.push({kind:'page',img:data.end,items:[]})}
 function showBook(){buildBook();let p=bookPages[bookIndex],s=$('#spread');s.className='spread '+(p.kind==='cover'?'cover':'');s.innerHTML=`<img src="${p.img}">`+(p.kind==='cover'?`<div style="position:absolute;left:50%;top:8%;transform:translateX(-50%);text-align:center;width:86%;font-family:'OngleipParkDahyeon',sans-serif;font-weight:400;text-shadow:0 2px 0 white"><div style="font-size:clamp(26px,4vw,52px)">${(data.title||'').replace(/</g,'&lt;')}</div>${data.className?`<div style="font-size:clamp(18px,2.5vw,32px);margin-top:8px">함께 만든 사람: ${data.className.replace(/</g,'&lt;')}</div>`:''}</div>`:'')+(p.items||[]).map(it=>`<div class="overlay ${it.type}" style="left:${it.x}%;top:${it.y}%;font-size:${it.size}px">${it.text.replace(/</g,'&lt;')}</div>`).join('');$('#count').textContent=`${bookIndex+1} / ${bookPages.length}`;$('#prev').disabled=bookIndex===0;$('#next').disabled=bookIndex===bookPages.length-1}
 $('#preview').onclick=()=>{buildBook();if(!bookPages.length)return alert('표지나 페이지를 먼저 추가해 주세요.');bookIndex=0;$('#maker').style.display='none';$('#book').style.display='block';showBook()};$('#prev').onclick=()=>{if(bookIndex){bookIndex--;showBook()}};$('#next').onclick=()=>{if(bookIndex<bookPages.length-1){bookIndex++;showBook()}};$('#back').onclick=()=>{$('#book').style.display='none';$('#maker').style.display='block'};
+
+function makeParentViewer(){
+  buildBook();
+  const payload=JSON.stringify({title:data.title||'우리들의 마술연필',creator:data.className||'',pages:bookPages});
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${(data.title||'우리들의 마술연필').replace(/</g,'&lt;')}</title>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/fonts-archive/Ownglyph_ParkDaHyun/Ownglyph_ParkDaHyun.css');
+*{box-sizing:border-box}body{margin:0;background:#f7f1df;font-family:'Ownglyph_ParkDaHyun','Noto Sans KR',sans-serif;color:#302b25}
+.wrap{max-width:1100px;margin:auto;padding:12px}.home{display:inline-block;margin-bottom:10px;padding:9px 14px;background:#fff;border-radius:12px;color:#333;text-decoration:none;font-weight:700}
+.shell{background:#c9b58a;padding:12px;border-radius:18px;box-shadow:0 12px 35px #0002}.spread{position:relative;aspect-ratio:3/2;background:#fff;border-radius:10px;overflow:hidden}.spread img{width:100%;height:100%;object-fit:contain}.spread:not(.cover):after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#0002}.spread.cover{max-width:58%;margin:auto}.overlay{position:absolute;white-space:pre-wrap;max-width:55%;font-family:'Ownglyph_ParkDaHyun','Noto Sans KR',sans-serif}.bubble{background:#fff;border:2px solid #333;border-radius:24px;padding:10px 15px}.nav{text-align:center;padding:14px}.nav button{padding:10px 18px;border:0;border-radius:12px;background:#fff;font-weight:800}.nav span{display:inline-block;min-width:90px}.notice{text-align:center;font-size:12px;color:#666;margin:8px}
+@media(max-width:700px){.spread.cover{max-width:82%}.wrap{padding:6px}.shell{padding:6px}}
+</style></head><body><div class="wrap"><a class="home" href="../../">🏠 처음으로</a><div class="shell"><div id="spread" class="spread"></div></div><div class="nav"><button id="prev">〈 이전</button><span id="count"></span><button id="next">다음 〉</button></div><div class="notice">본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div></div>
+<script>
+const D=${payload};let i=0,s=document.getElementById('spread');
+function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function show(){let p=D.pages[i];s.className='spread '+(p.kind==='cover'?'cover':'');s.innerHTML='<img src="'+p.img+'">'+(p.kind==='cover'?'<div style="position:absolute;left:50%;top:8%;transform:translateX(-50%);text-align:center;width:86%;font-weight:900"><div style="font-size:clamp(26px,4vw,52px)">'+esc(D.title)+'</div>'+(D.creator?'<div style="font-size:clamp(18px,2.5vw,32px);margin-top:8px">함께 만든 사람: '+esc(D.creator)+'</div>':'')+'</div>':'')+(p.items||[]).map(x=>'<div class="overlay '+x.type+'" style="left:'+x.x+'%;top:'+x.y+'%;font-size:'+x.size+'px">'+esc(x.text)+'</div>').join('');document.getElementById('count').textContent=(i+1)+' / '+D.pages.length;document.getElementById('prev').disabled=i===0;document.getElementById('next').disabled=i===D.pages.length-1}
+document.getElementById('prev').onclick=()=>{if(i>0){i--;show()}};document.getElementById('next').onclick=()=>{if(i<D.pages.length-1){i++;show()}};show();
+<\/script></body></html>`;
+}
+$('#publish').onclick=()=>{
+  buildBook();
+  if(!bookPages.length)return alert('게시할 페이지가 없습니다.');
+  const blob=new Blob([makeParentViewer()],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='index.html';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  alert('학부모용 index.html을 만들었습니다. magicpencel/ebook/view/index.html에 올려 주세요.');
+};
+
 $('#reset').onclick=()=>{if(!confirm('아이 작품과 편집 내용을 모두 초기화할까요? 고정 페이지는 유지됩니다.'))return;localStorage.removeItem(KEY);location.reload()};
 renderList();
 </script></body></html>
