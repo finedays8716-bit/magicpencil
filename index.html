@@ -1,6 +1,155 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>우리들의 마술연필</title>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(#fff9e8,#eaf7e7);font-family:Arial,"Noto Sans KR",sans-serif;color:#3b352c}.box{width:min(900px,92vw);text-align:center;background:#ffffffdd;border-radius:28px;padding:46px 24px;box-shadow:0 16px 45px #6b5b3822}h1{font-size:clamp(32px,6vw,58px);margin:0 0 8px}.sub{color:#766b59;margin-bottom:32px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:680px;margin:auto}.card{display:flex;min-height:170px;align-items:center;justify-content:center;flex-direction:column;text-decoration:none;color:#352f28;background:#fff;border:2px solid #e2d6b8;border-radius:24px;font-size:22px;font-weight:900;box-shadow:0 7px 18px #00000010;transition:.15s}.card:hover{transform:translateY(-3px)}.ico{font-size:48px;margin-bottom:10px}.small{font-size:13px;font-weight:500;color:#777;margin-top:8px}@media(max-width:620px){.buttons{grid-template-columns:1fr}.box{padding:32px 18px}}</style></head>
-<body><main class="box"><h1>✏️ 우리들의 마술연필</h1><div class="sub">마술연필로 그리고, 우리들의 이야기책을 만들어 보아요.</div><div class="buttons">
-<a class="card" href="./draw/"><span class="ico">🎨</span>마술연필 그림 그리기<span class="small">동물 친구를 도와주는 그림을 그려요</span></a>
-<a class="card" href="./ebook/"><span class="ico">📖</span>E북 만들기<span class="small">아이들의 작품으로 이야기책을 만들어요</span></a>
-</div></main></body></html>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마술연필 E북 만들기</title><style>@font-face{font-family:'OngleipParkDahyeon';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+
+*{box-sizing:border-box}body{margin:0;background:#f7f0df;color:#342d25;font-family:system-ui,"Noto Sans KR",sans-serif}.wrap{max-width:1250px;margin:auto;padding:18px}
+h1{text-align:center}.hint{text-align:center}.card{background:#fff;border-radius:18px;padding:15px;margin:13px 0;box-shadow:0 4px 18px #0001}
+.row,.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center}button,.file{border:0;background:#fff;border-radius:13px;padding:10px 14px;box-shadow:0 2px 8px #0002;font-weight:800;cursor:pointer}.primary{background:#ffe169}.danger{color:#a00}
+input[type=text],textarea{padding:10px;border:2px solid #ded1ad;border-radius:10px;font-size:16px}.pages{display:grid;gap:10px;margin-top:10px}.item{display:grid;grid-template-columns:50px 110px 110px 1fr auto;gap:10px;align-items:center;padding:9px;border:2px solid #eee1c3;border-radius:14px}.item.sel{border-color:#e8b900;background:#fffbea}.thumb{width:110px;aspect-ratio:3/2;object-fit:cover;border-radius:8px;background:#eee}.small{font-size:12px;text-align:center}.empty{padding:25px;text-align:center;color:#877b6a;background:#faf7ef;border-radius:12px}
+.book,.decor{display:none}.shell{max-width:1150px;margin:20px auto}.spread{position:relative;aspect-ratio:3/2;background:#fff;overflow:hidden;border-radius:10px;box-shadow:0 18px 42px #0003}.spread:not(.cover):after{content:"";position:absolute;left:50%;top:0;bottom:0;width:30px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,#0002 45%,#fff8 50%,#0002 55%,transparent);pointer-events:none}.spread img{width:100%;height:100%;object-fit:contain}.spread.cover{background:transparent;box-shadow:none;display:flex;justify-content:center;overflow:visible}.spread.cover img{width:auto;height:100%;max-width:50%;box-shadow:0 14px 34px #0003;border-radius:5px 14px 14px 5px}
+.overlay{font-family:'OngleipParkDahyeon',sans-serif;position:absolute;z-index:3;left:15%;top:15%;max-width:55%;padding:10px 14px;white-space:pre-wrap;cursor:move}.overlay.text{font-size:28px;font-weight:800;text-shadow:0 1px 2px #fff}.overlay.bubble{font-size:24px;font-weight:750;background:#fff;border:3px solid #383129;border-radius:26px}.overlay.selected{outline:3px dashed #e7b800}
+.editgrid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.canvas{position:relative;aspect-ratio:3/2;background:#fff;overflow:hidden;border-radius:15px;box-shadow:0 4px 18px #0002}.canvas img{width:100%;height:100%;object-fit:contain}.side label{display:block;font-weight:800;margin:9px 0 5px}.side textarea{width:100%;min-height:100px}.nav{text-align:center;margin:12px}.nav span{display:inline-block;min-width:90px;font-weight:850}@media(max-width:800px){.item{grid-template-columns:40px 80px 80px 1fr}.thumb{width:80px}.item .actions{grid-column:1/-1}.editgrid{grid-template-columns:1fr}}
+</style><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script></head><body>
+<div class=wrap id=maker><h1>📖 마술연필 E북 만들기</h1>
+<p class=hint>표지·동물 만남 장면·마지막 장면은 기본 페이지로 고정되어 있습니다. 아이 작품만 사이사이에 추가하세요.</p>
+<p class=hint style="font-weight:800;color:#7a6500">📐 아이 작품 권장 이미지 크기: 1536 × 1024 px (가로 3:2)</p>
+<div class=card><h3>📕 표지 글자</h3><div class=row>
+<input id=bookTitle type=text placeholder="제목 (예: 우리들의 마술연필)" style="min-width:260px">
+<div style="display:flex;align-items:center;gap:8px"><b>함께 만든 사람:</b><input id=className type=text placeholder="예: 새싹반 친구들" style="min-width:210px"></div>
+<small>표지 그림은 고정되어 있고 제목과 ‘함께 만든 사람’만 바꿀 수 있습니다.</small>
+</div></div>
+<div class=card><h3>＋ 아이 작품 추가 <small>— 업로드 시 자동으로 1536×1024 이내·게시용 화질로 압축됩니다.</small></h3><div class=row><input id=name type=text placeholder="아이 이름"><label class=file>✏️ 원본 그림 선택<input id=orig type=file accept="image/*" hidden></label><span id=origTxt>선택 안 됨</span><label class=file>✨ AI 그림 선택<input id=ai type=file accept="image/*" hidden></label><span id=aiTxt>선택 안 됨</span><button class=primary id=add>＋ 작품 추가</button></div></div>
+<div class=card><h3>📑 페이지 구성 <span id="workCount" style="font-size:14px;color:#8a6d00"></span> <small>— 🔒 이야기 장면은 고정입니다. 아이 작품은 각 동물 이야기 사이에 추가할 수 있습니다.</small></h3><div id=list class=pages></div></div>
+<div class=card><h3>💬 선택한 페이지 꾸미기</h3><div class=tools><button id=editOrig>✏️ 원본에 글자/말풍선 넣기</button><button id=editAi>✨ AI 그림에 글자/말풍선 넣기</button></div><small>고정 페이지 또는 아이 작품을 선택한 뒤 편집해 주세요.</small></div>
+<div class=card style="font-size:13px;line-height:1.6"><b>ℹ️ 제작 안내</b><br>본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools><button class=primary id=preview>📖 완성된 E북 보기</button><button class=primary id=exportPdf>📄 완성 E북 PDF 만들기</button><button class=danger id=reset>전체 초기화</button></div></div>
+
+<div class="wrap book" id=book><div class=shell><div id=spread class=spread></div></div><div class=nav><button id=prev>〈 이전</button><span id=count></span><button id=next>다음 〉</button></div><div style="max-width:900px;margin:8px auto 0;text-align:center;font-size:12px;color:#666;line-height:1.5">본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools style="justify-content:center"><button id=back>✏️ 편집으로 돌아가기</button></div></div>
+
+<div class="wrap decor" id=decor><h1>💬 페이지 꾸미기</h1><div class=editgrid><div id=canvas class=canvas></div><div class="card side"><button id=addText>✏️ 글자 추가</button> <button id=addBubble>💬 말풍선 추가</button><label>선택한 글 내용</label><textarea id=text></textarea><label>글자 크기</label><input id=size type=range min=16 max=54 value=28 style="width:100%"><div style="margin-top:10px"><button class=danger id=del>선택 요소 삭제</button></div><p style="font-size:13px">글자와 말풍선은 그림 위에서 끌어 이동할 수 있습니다.</p></div></div><div class=tools style="justify-content:center"><button class=primary id=done>✓ 편집 완료</button></div></div>
+
+<script>
+const BUILTIN={cover:'images/page-01.png',fixed:[{id:'walk1',img:'images/page-02.png',items:[]},{id:'deer',img:'images/page-03.png',items:[]},{id:'walk2',img:'images/page-04.png',items:[]},{id:'bear',img:'images/page-05.png',items:[]},{id:'walk3',img:'images/page-06.png',items:[]},{id:'otter',img:'images/page-07.png',items:[]},{id:'fly',img:'images/page-08.png',items:[]},{id:'polar',img:'images/page-09.png',items:[]}],end:'images/page-10.png'};
+const KEY='magicEbookV12';
+let data={cover:BUILTIN.cover,className:'',title:'우리들의 마술연필',end:BUILTIN.end,entries:BUILTIN.fixed.map(x=>({type:'general',fixed:true,builtin:true,id:x.id,img:x.img,items:[]}))};
+try{
+  let saved=localStorage.getItem(KEY);
+  if(!saved) saved=localStorage.getItem('magicEbookV10');
+  if(!saved){let old9=localStorage.getItem('magicEbookV9')||localStorage.getItem('magicEbookV8');if(old9)saved=old9;}
+  if(saved){
+    let u=JSON.parse(saved);
+    data.className=u.className||'';
+    data.title=u.title||'우리들의 마술연필';
+    {
+      const savedEntries=u.entries||[];
+      const freshById=Object.fromEntries(data.entries.filter(x=>x.builtin).map(x=>[x.id,x]));
+      data.entries=savedEntries.map(e=>{
+        if(e.builtin && freshById[e.id]) return {...freshById[e.id],items:e.items||[]};
+        return e;
+      });
+      // Add any newly introduced fixed pages that an older save did not contain.
+      const present=new Set(data.entries.filter(x=>x.builtin).map(x=>x.id));
+      Object.values(freshById).forEach(f=>{if(!present.has(f.id))data.entries.push(f)});
+    }
+}
+}catch(e){}
+let pending={orig:"",ai:"",general:""},selectedEntry=0,decorRef=null,selectedEl=null,bookPages=[],bookIndex=0;
+const $=s=>document.querySelector(s);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.warn('브라우저 저장공간 부족: 현재 화면 작업은 유지됩니다.',e)}}
+function fileData(file){return new Promise((ok,no)=>{
+  if(!file || !file.type.startsWith('image/')) return no(new Error('이미지 파일이 아닙니다.'));
+  const r=new FileReader();
+  r.onerror=no;
+  r.onload=()=>{
+    const img=new Image();
+    img.onerror=no;
+    img.onload=()=>{
+      // E북 펼침면 기준 최대 1536×1024. 작은 그림은 확대하지 않음.
+      const maxW=1536,maxH=1024;
+      const scale=Math.min(1,maxW/img.naturalWidth,maxH/img.naturalHeight);
+      const w=Math.max(1,Math.round(img.naturalWidth*scale));
+      const h=Math.max(1,Math.round(img.naturalHeight*scale));
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      // JPEG 0.82: 학부모 게시 HTML 용량을 크게 줄이면서 그림 품질 유지
+      ok(c.toDataURL('image/jpeg',0.82));
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+})}
+$('#bookTitle').value=data.title||'우리들의 마술연필';$('#bookTitle').oninput=e=>{data.title=e.target.value;save()};
+$('#className').value=data.className||'';$('#className').oninput=e=>{data.className=e.target.value;save()};
+$('#orig').onchange=async()=>{let f=$('#orig').files[0];if(!f)return;$('#origTxt').textContent=f.name;pending.orig=await fileData(f)};
+$('#ai').onchange=async()=>{let f=$('#ai').files[0];if(!f)return;$('#aiTxt').textContent=f.name;pending.ai=await fileData(f)};
+$('#add').onclick=()=>{let n=$('#name').value.trim();if(!pending.orig||!pending.ai){alert('원본 그림과 AI 그림을 모두 선택한 뒤 작품 추가를 눌러 주세요.');return}data.entries.push({type:'work',name:n||'이름 없음',original:pending.orig,ai:pending.ai,originalItems:[],aiItems:[]});selectedEntry=data.entries.length-1;pending.orig='';pending.ai='';$('#name').value='';$('#orig').value='';$('#ai').value='';$('#origTxt').textContent='선택 안 됨';$('#aiTxt').textContent='선택 안 됨';save();renderList();$('#list').scrollIntoView({behavior:'smooth',block:'center'})};
+function renderList(){let l=$('#list');$('#workCount').textContent=`(${data.entries.length}개 항목)`;if(!data.entries.length){l.innerHTML='<div class=empty>아직 추가된 페이지가 없습니다.</div>';return}l.innerHTML='';data.entries.forEach((e,i)=>{let d=document.createElement('div');d.className='item '+(i===selectedEntry?'sel':'');if(e.type==='general')d.innerHTML=`<b>${i+1}</b><div><img class=thumb src="${e.img}"><div class=small>고정 장면</div></div><div></div><div><b>🔒 ${({walk1:'길을 걷는 꼬마곰',deer:'노루 만남',walk2:'다시 길을 걷는 꼬마곰',bear:'반달가슴곰 만남',walk3:'강가로 걸어가는 꼬마곰',otter:'수달 만남',fly:'새를 타고 하늘을 나는 꼬마곰',polar:'아기 북극곰 발견'})[e.id]||'고정 장면'}</b><br><small>기본 페이지 · 이동/삭제 불가</small></div><div class=actions></div>`;else d.innerHTML=`<b>${i+1}</b><div><img class=thumb src="${e.original}"><div class=small>원본</div></div><div><img class=thumb src="${e.ai}"><div class=small>AI 완성</div></div><div><b>👧 ${e.name}</b><br><small>아이 작품 · 원본→AI</small></div><div class=actions><button data-u="${i}">↑</button><button data-d="${i}">↓</button><button class=danger data-x="${i}">삭제</button></div>`;d.onclick=x=>{if(x.target.tagName!=='BUTTON'){selectedEntry=i;renderList()}};l.appendChild(d)});l.querySelectorAll('[data-u]').forEach(b=>b.onclick=x=>{x.stopPropagation();move(+b.dataset.u,-1)});l.querySelectorAll('[data-d]').forEach(b=>b.onclick=x=>{x.stopPropagation();move(+b.dataset.d,1)});l.querySelectorAll('[data-x]').forEach(b=>b.onclick=x=>{x.stopPropagation();data.entries.splice(+b.dataset.x,1);selectedEntry=Math.max(0,Math.min(selectedEntry,data.entries.length-1));save();renderList()})}
+function workSlotAt(i){let c=0;for(let k=0;k<i;k++)if(data.entries[k].type==='general')c++;return c}
+function move(i,d){
+  if(data.entries[i]?.type!=='work') return;
+  const j=i+d;
+  if(j<0 || j>=data.entries.length) return;
+  [data.entries[i],data.entries[j]]=[data.entries[j],data.entries[i]];
+  selectedEntry=j;
+  save();
+  renderList();
+}
+function openDecor(kind){if(!data.entries.length)return alert('먼저 페이지나 작품을 추가해 주세요.');let e=data.entries[selectedEntry];if(kind==='general'){if(e.type!=='general')return alert('일반 페이지를 선택해 주세요.');decorRef={img:e.img,items:e.items}}else{if(e.type!=='work')return alert('아이 작품을 선택해 주세요.');decorRef={img:kind==='orig'?e.original:e.ai,items:kind==='orig'?e.originalItems:e.aiItems}}$('#maker').style.display='none';$('#decor').style.display='block';renderDecor()}
+$('#editOrig').onclick=()=>openDecor('orig');$('#editAi').onclick=()=>openDecor('ai');
+function renderDecor(){let c=$('#canvas');c.innerHTML=`<img src="${decorRef.img}">`;selectedEl=null;decorRef.items.forEach((it,i)=>{let d=document.createElement('div');d.className='overlay '+it.type;d.textContent=it.text;d.style.left=it.x+'%';d.style.top=it.y+'%';d.style.fontSize=it.size+'px';d.dataset.i=i;makeDrag(d);d.onclick=x=>{x.stopPropagation();select(d)};c.appendChild(d)})}
+function select(d){$('#canvas').querySelectorAll('.overlay').forEach(x=>x.classList.remove('selected'));selectedEl=d;d.classList.add('selected');let it=decorRef.items[+d.dataset.i];$('#text').value=it.text;$('#size').value=it.size}
+function addOverlay(type){decorRef.items.push({type,text:type==='bubble'?'고마워!':'글자를 써 주세요.',x:15,y:15,size:type==='bubble'?24:28});save();renderDecor();select($('#canvas').querySelectorAll('.overlay')[decorRef.items.length-1])}
+$('#addText').onclick=()=>addOverlay('text');$('#addBubble').onclick=()=>addOverlay('bubble');$('#text').oninput=x=>{if(!selectedEl)return;let it=decorRef.items[+selectedEl.dataset.i];it.text=x.target.value;selectedEl.textContent=it.text;save()};$('#size').oninput=x=>{if(!selectedEl)return;let it=decorRef.items[+selectedEl.dataset.i];it.size=+x.target.value;selectedEl.style.fontSize=it.size+'px';save()};$('#del').onclick=()=>{if(!selectedEl)return;decorRef.items.splice(+selectedEl.dataset.i,1);save();renderDecor()};
+function makeDrag(el){let on=false,sx,sy,ox,oy;el.onpointerdown=x=>{on=true;el.setPointerCapture(x.pointerId);sx=x.clientX;sy=x.clientY;ox=parseFloat(el.style.left);oy=parseFloat(el.style.top);select(el)};el.onpointermove=x=>{if(!on)return;let r=$('#canvas').getBoundingClientRect();el.style.left=Math.max(0,Math.min(88,ox+(x.clientX-sx)/r.width*100))+'%';el.style.top=Math.max(0,Math.min(88,oy+(x.clientY-sy)/r.height*100))+'%'};el.onpointerup=()=>{if(!on)return;on=false;let it=decorRef.items[+el.dataset.i];it.x=parseFloat(el.style.left);it.y=parseFloat(el.style.top);save()}}
+$('#done').onclick=()=>{$('#decor').style.display='none';$('#maker').style.display='block';renderList()};
+function buildBook(){bookPages=[];if(data.cover)bookPages.push({kind:'cover',img:data.cover,items:[]});data.entries.forEach(e=>{if(e.type==='general')bookPages.push({kind:'page',img:e.img,items:e.items||[]});else{bookPages.push({kind:'page',img:e.original,items:e.originalItems||[]});bookPages.push({kind:'page',img:e.ai,items:e.aiItems||[]})}});if(data.end)bookPages.push({kind:'page',img:data.end,items:[]})}
+function showBook(){buildBook();let p=bookPages[bookIndex],s=$('#spread');s.className='spread '+(p.kind==='cover'?'cover':'');s.innerHTML=`<img src="${p.img}">`+(p.kind==='cover'?`<div style="position:absolute;left:50%;top:8%;transform:translateX(-50%);text-align:center;width:86%;font-family:'OngleipParkDahyeon',sans-serif;font-weight:400;text-shadow:0 2px 0 white"><div style="font-size:clamp(26px,4vw,52px)">${(data.title||'').replace(/</g,'&lt;')}</div>${data.className?`<div style="font-size:clamp(18px,2.5vw,32px);margin-top:8px">함께 만든 사람: ${data.className.replace(/</g,'&lt;')}</div>`:''}</div>`:'')+(p.items||[]).map(it=>`<div class="overlay ${it.type}" style="left:${it.x}%;top:${it.y}%;font-size:${it.size}px">${it.text.replace(/</g,'&lt;')}</div>`).join('');$('#count').textContent=`${bookIndex+1} / ${bookPages.length}`;$('#prev').disabled=bookIndex===0;$('#next').disabled=bookIndex===bookPages.length-1}
+$('#preview').onclick=()=>{buildBook();if(!bookPages.length)return alert('표지나 페이지를 먼저 추가해 주세요.');bookIndex=0;$('#maker').style.display='none';$('#book').style.display='block';showBook()};$('#prev').onclick=()=>{if(bookIndex){bookIndex--;showBook()}};$('#next').onclick=()=>{if(bookIndex<bookPages.length-1){bookIndex++;showBook()}};$('#back').onclick=()=>{$('#book').style.display='none';$('#maker').style.display='block'};
+
+
+async function loadImg(src){return await new Promise((ok,no)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=no;im.src=src})}
+async function renderPageForPdf(p){
+  const W=1536,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  const im=await loadImg(p.img);
+  const r=Math.min(W/im.naturalWidth,H/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;
+  x.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh);
+  // Cover editable title/creator.
+  if(p.kind==='cover'){
+    x.textAlign='center';x.fillStyle='#302b25';
+    x.font="bold 72px sans-serif";x.fillText(data.title||'우리들의 마술연필',W/2,120);
+    if(data.className){x.font="42px sans-serif";x.fillText('함께 만든 사람: '+data.className,W/2,185)}
+  }
+  for(const it of (p.items||[])){
+    const px=W*(Number(it.x)||0)/100,py=H*(Number(it.y)||0)/100,fs=Math.max(18,Number(it.size)||34);
+    x.font=`${fs}px sans-serif`;x.textBaseline='top';x.fillStyle='#222';
+    const text=String(it.text||'');
+    if(it.type==='bubble'){
+      const pad=18,metrics=x.measureText(text),bw=Math.min(W*.5,metrics.width+pad*2),bh=fs*1.6+pad;
+      x.fillStyle='#fff';x.strokeStyle='#333';x.lineWidth=3;
+      x.beginPath();x.roundRect(px,py,bw,bh,24);x.fill();x.stroke();x.fillStyle='#222';x.fillText(text,px+pad,py+pad/2);
+    }else x.fillText(text,px,py);
+  }
+  return c.toDataURL('image/jpeg',0.86);
+}
+$('#exportPdf').onclick=async()=>{
+  buildBook();if(!bookPages.length)return alert('PDF로 만들 페이지가 없습니다.');
+  if(!window.jspdf)return alert('PDF 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+  const btn=$('#exportPdf'),old=btn.textContent;btn.disabled=true;btn.textContent='⏳ PDF 만드는 중...';
+  try{
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'landscape',unit:'px',format:[1536,1024],hotfixes:['px_scaling']});
+    for(let i=0;i<bookPages.length;i++){
+      if(i>0)pdf.addPage([1536,1024],'landscape');
+      const img=await renderPageForPdf(bookPages[i]);
+      pdf.addImage(img,'JPEG',0,0,1536,1024,undefined,'FAST');
+    }
+    pdf.save('book.pdf');
+    alert('완성 E북 PDF를 만들었습니다. 파일명을 book.pdf로 유지해서 GitHub의 ebook/view/book.pdf에 올려 주세요.');
+  }catch(e){console.error(e);alert('PDF 생성 중 오류가 발생했습니다: '+e.message)}
+  finally{btn.disabled=false;btn.textContent=old}
+};
+
+$('#reset').onclick=()=>{if(!confirm('아이 작품과 편집 내용을 모두 초기화할까요? 고정 페이지는 유지됩니다.'))return;localStorage.removeItem(KEY);location.reload()};
+renderList();
+</script></body></html>
