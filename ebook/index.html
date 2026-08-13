@@ -117,12 +117,12 @@ async function renderPageForParent(p){
   x.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh);
   if(p.kind==='cover'){
     x.textAlign='center';x.fillStyle='#302b25';
-    x.font="bold 72px sans-serif";x.fillText(data.title||'우리들의 마술연필',W/2,120);
-    if(data.className){x.font="42px sans-serif";x.fillText('함께 만든 사람: '+data.className,W/2,185)}
+    x.font="72px OngleipParkDahyeon";x.fillText(data.title||'우리들의 마술연필',W/2,120);
+    if(data.className){x.font="42px OngleipParkDahyeon";x.fillText('함께 만든 사람: '+data.className,W/2,185)}
   }
   for(const it of (p.items||[])){
     const px=W*(Number(it.x)||0)/100,py=H*(Number(it.y)||0)/100,fs=Math.max(18,Number(it.size)||34);
-    x.font=`${fs}px sans-serif`;x.textBaseline='top';x.fillStyle='#222';
+    x.font=`${fs}px OngleipParkDahyeon`;x.textBaseline='top';x.fillStyle='#222';
     const text=String(it.text||'');
     if(it.type==='bubble'){
       const pad=18,metrics=x.measureText(text),bw=Math.min(W*.6,metrics.width+pad*2),bh=fs*1.6+pad;
@@ -142,6 +142,12 @@ function src(n){return 'pages/page-'+String(n).padStart(2,'0')+'.jpg'}function u
 <\/script></body></html>`}
 $('#exportParent').onclick=async()=>{
   buildBook();if(!bookPages.length)return alert('만들 페이지가 없습니다.');
+  // 편집 화면과 동일한 온글잎 박다현체가 실제로 로드된 뒤 JPG를 생성합니다.
+  try{
+    await document.fonts.load("72px OngleipParkDahyeon");
+    await document.fonts.load("42px OngleipParkDahyeon");
+    await document.fonts.ready;
+  }catch(e){console.warn('박다현체 로딩 확인 실패',e)}
   if(!window.JSZip)return alert('압축 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
   const btn=$('#exportParent'),old=btn.textContent;btn.disabled=true;btn.textContent='⏳ 학부모용 E북 만드는 중...';
   try{
