@@ -1,23 +1,10 @@
-GitHub의 magicpencel 폴더에 이 구조로 올리세요.
+magicpencel v11
 
-magicpencel/
-├─ index.html              ← 새 첫 화면
-├─ draw/
-│  └─ index.html           ← 기존 마술연필 그림그리기
-├─ ebook/
-│  ├─ index.html           ← E북 편집기
-│  └─ view/
-│     └─ index.html        ← 게시 버튼으로 만든 학부모용 파일
-└─ 기존 그림그리기 이미지 파일들은 루트에 그대로 유지
-   forest-base.png / bear-base.png / otter-base.png / polar-base.png
-   magic-pencil-cursor.png / trash-*.png
+핵심 변경:
+- 표지와 마지막 페이지는 고정
+- 노루/반달가슴곰/수달/북극곰 기본 장면은 삭제 불가
+- 아이 작품은 페이지 구성의 ↑↓ 버튼으로 고정 장면을 넘어 자유롭게 이동 가능
+- 따라서 '노루 장면 → 노루 작품들 → 반달가슴곰 장면 → 반달가슴곰 작품들 ...'처럼 원하는 순서로 구성 가능
+- 기존 v10 저장 내용 자동 불러오기
 
-중요:
-기존 magicpencel 루트에 있던 배경·쓰레기·커서 PNG는 삭제하지 마세요.
-draw/index.html이 ../파일명 으로 그 파일들을 그대로 사용하도록 수정되어 있습니다.
-
-주소
-첫 화면: https://finedays8716-bit.github.io/magicpencel/
-그림그리기: https://finedays8716-bit.github.io/magicpencel/draw/
-E북 편집기: https://finedays8716-bit.github.io/magicpencel/ebook/
-학부모용: https://finedays8716-bit.github.io/magicpencel/ebook/view/
+GitHub에서는 기존 구조를 유지하고 ebook/index.html을 이번 파일로 교체하면 됩니다.
