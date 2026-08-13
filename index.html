@@ -55,9 +55,18 @@ document.querySelector('#clear').onclick=resetDrawing;
 document.querySelector('#undo').onclick=()=>{history.pop();ctx.clearRect(0,0,c.width,c.height);if(history.length){let im=new Image();im.onload=()=>ctx.drawImage(im,0,0,c.clientWidth,c.clientHeight);im.src=history.at(-1)}};
 async function compositeBlob(){let x=document.createElement('canvas');x.width=1536;x.height=1024;let q=x.getContext('2d');q.drawImage(bg,0,0,x.width,x.height);q.drawImage(c,0,0,x.width,x.height);return new Promise(r=>x.toBlob(r,'image/png'))}
 async function compositeDataUrl(){let b=await compositeBlob();return new Promise(resolve=>{let r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(b)})}
+async function aiTransportDataUrl(){
+  let x=document.createElement('canvas');
+  x.width=1152;x.height=768;
+  let q=x.getContext('2d');
+  q.fillStyle='#fff';q.fillRect(0,0,x.width,x.height);
+  q.drawImage(bg,0,0,x.width,x.height);
+  q.drawImage(c,0,0,x.width,x.height);
+  return x.toDataURL('image/jpeg',0.82);
+}
 function downloadData(data,name){let a=document.createElement('a');a.href=data;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 document.querySelector('#downChild').onclick=async()=>downloadData(await compositeDataUrl(),`${safeName()}_${missions[mission].label}_내그림.png`);
 document.querySelector('#downAI').onclick=()=>{let d=document.querySelector('#out').src;if(d)downloadData(d,`${safeName()}_${missions[mission].label}_AI완성.png`)};
-document.querySelector('#magic').onclick=async()=>{let loading=document.querySelector('#loading');loading.style.display='grid';try{let dataUrl=await compositeDataUrl();let rr=await fetch('/api/magic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl,mission})});let j=await rr.json();if(!rr.ok)throw Error(j.error||'실패');document.querySelector('#out').src=j.image;document.querySelector('#draw').style.display='none';document.querySelector('#result').style.display='block'}catch(e){alert('AI 변환에 실패했어요.\\n'+e.message)}finally{loading.style.display='none'}};
+document.querySelector('#magic').onclick=async()=>{let loading=document.querySelector('#loading');loading.style.display='grid';try{let dataUrl=await aiTransportDataUrl();let rr=await fetch('/api/magic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl,mission})});let j=await rr.json();if(!rr.ok)throw Error(j.error||'실패');document.querySelector('#out').src=j.image;document.querySelector('#draw').style.display='none';document.querySelector('#result').style.display='block'}catch(e){alert('AI 변환에 실패했어요.\\n'+e.message)}finally{loading.style.display='none'}};
 document.querySelector('#again').onclick=()=>applyMission(mission);document.querySelector('#deerTab').onclick=()=>applyMission('deer');document.querySelector('#bearTab').onclick=()=>applyMission('bear');applyMission('deer');
 </script></body></html>
