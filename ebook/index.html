@@ -28,32 +28,32 @@ input[type=text],textarea{padding:10px;border:2px solid #ded1ad;border-radius:10
 
 <script>
 const BUILTIN={cover:'images/page-01.png',fixed:[{id:'walk1',img:'images/page-02.png',items:[]},{id:'deer',img:'images/page-03.png',items:[]},{id:'walk2',img:'images/page-04.png',items:[]},{id:'bear',img:'images/page-05.png',items:[]},{id:'walk3',img:'images/page-06.png',items:[]},{id:'otter',img:'images/page-07.png',items:[]},{id:'fly',img:'images/page-08.png',items:[]},{id:'polar',img:'images/page-09.png',items:[]}],end:'images/page-10.png'};
-const KEY='magicEbookV10';
+const KEY='magicEbookV12';
 let data={cover:BUILTIN.cover,className:'',title:'우리들의 마술연필',end:BUILTIN.end,entries:BUILTIN.fixed.map(x=>({type:'general',fixed:true,builtin:true,id:x.id,img:x.img,items:[]}))};
 try{
   let saved=localStorage.getItem(KEY);
+  if(!saved) saved=localStorage.getItem('magicEbookV10');
   if(!saved){let old9=localStorage.getItem('magicEbookV9')||localStorage.getItem('magicEbookV8');if(old9)saved=old9;}
   if(saved){
     let u=JSON.parse(saved);
     data.className=u.className||'';
     data.title=u.title||'우리들의 마술연필';
-    data.entries.forEach(f=>{
-      let old=(u.entries||[]).find(x=>x.builtin&&x.id===f.id);
-      if(old) f.items=old.items||[];
-    });
-    let works=(u.entries||[]).filter(x=>x.type==='work');
-    // Restore works around the fixed story pages using saved slot numbers.
-    works.forEach(w=>{
-      let slot=Math.max(0,Math.min(BUILTIN.fixed.length,w.slot??BUILTIN.fixed.length));
-      let fixedSeen=0, idx=data.entries.length;
-      for(let i=0;i<data.entries.length;i++){if(data.entries[i].type==='general')fixedSeen++; if(fixedSeen>slot){idx=i;break}}
-      data.entries.splice(idx,0,w);
-    });
-  }
+    {
+      const savedEntries=u.entries||[];
+      const freshById=Object.fromEntries(data.entries.filter(x=>x.builtin).map(x=>[x.id,x]));
+      data.entries=savedEntries.map(e=>{
+        if(e.builtin && freshById[e.id]) return {...freshById[e.id],items:e.items||[]};
+        return e;
+      });
+      // Add any newly introduced fixed pages that an older save did not contain.
+      const present=new Set(data.entries.filter(x=>x.builtin).map(x=>x.id));
+      Object.values(freshById).forEach(f=>{if(!present.has(f.id))data.entries.push(f)});
+    }
+}
 }catch(e){}
 let pending={orig:"",ai:"",general:""},selectedEntry=0,decorRef=null,selectedEl=null,bookPages=[],bookIndex=0;
 const $=s=>document.querySelector(s);
-function save(){try{(data.entries||[]).forEach((e,i)=>{if(e.type==='work')e.slot=workSlotAt?workSlotAt(i):BUILTIN.fixed.length});localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.warn('브라우저 저장공간 부족: 현재 화면 작업은 유지됩니다.',e)}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.warn('브라우저 저장공간 부족: 현재 화면 작업은 유지됩니다.',e)}}
 function fileData(file){return new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(file)})}
 $('#bookTitle').value=data.title||'우리들의 마술연필';$('#bookTitle').oninput=e=>{data.title=e.target.value;save()};
 $('#className').value=data.className||'';$('#className').oninput=e=>{data.className=e.target.value;save()};
@@ -62,7 +62,15 @@ $('#ai').onchange=async()=>{let f=$('#ai').files[0];if(!f)return;$('#aiTxt').tex
 $('#add').onclick=()=>{let n=$('#name').value.trim();if(!pending.orig||!pending.ai){alert('원본 그림과 AI 그림을 모두 선택한 뒤 작품 추가를 눌러 주세요.');return}data.entries.push({type:'work',name:n||'이름 없음',original:pending.orig,ai:pending.ai,originalItems:[],aiItems:[]});selectedEntry=data.entries.length-1;pending.orig='';pending.ai='';$('#name').value='';$('#orig').value='';$('#ai').value='';$('#origTxt').textContent='선택 안 됨';$('#aiTxt').textContent='선택 안 됨';save();renderList();$('#list').scrollIntoView({behavior:'smooth',block:'center'})};
 function renderList(){let l=$('#list');$('#workCount').textContent=`(${data.entries.length}개 항목)`;if(!data.entries.length){l.innerHTML='<div class=empty>아직 추가된 페이지가 없습니다.</div>';return}l.innerHTML='';data.entries.forEach((e,i)=>{let d=document.createElement('div');d.className='item '+(i===selectedEntry?'sel':'');if(e.type==='general')d.innerHTML=`<b>${i+1}</b><div><img class=thumb src="${e.img}"><div class=small>고정 장면</div></div><div></div><div><b>🔒 ${({walk1:'길을 걷는 꼬마곰',deer:'노루 만남',walk2:'다시 길을 걷는 꼬마곰',bear:'반달가슴곰 만남',walk3:'강가로 걸어가는 꼬마곰',otter:'수달 만남',fly:'새를 타고 하늘을 나는 꼬마곰',polar:'아기 북극곰 발견'})[e.id]||'고정 장면'}</b><br><small>기본 페이지 · 이동/삭제 불가</small></div><div class=actions></div>`;else d.innerHTML=`<b>${i+1}</b><div><img class=thumb src="${e.original}"><div class=small>원본</div></div><div><img class=thumb src="${e.ai}"><div class=small>AI 완성</div></div><div><b>👧 ${e.name}</b><br><small>아이 작품 · 원본→AI</small></div><div class=actions><button data-u="${i}">↑</button><button data-d="${i}">↓</button><button class=danger data-x="${i}">삭제</button></div>`;d.onclick=x=>{if(x.target.tagName!=='BUTTON'){selectedEntry=i;renderList()}};l.appendChild(d)});l.querySelectorAll('[data-u]').forEach(b=>b.onclick=x=>{x.stopPropagation();move(+b.dataset.u,-1)});l.querySelectorAll('[data-d]').forEach(b=>b.onclick=x=>{x.stopPropagation();move(+b.dataset.d,1)});l.querySelectorAll('[data-x]').forEach(b=>b.onclick=x=>{x.stopPropagation();data.entries.splice(+b.dataset.x,1);selectedEntry=Math.max(0,Math.min(selectedEntry,data.entries.length-1));save();renderList()})}
 function workSlotAt(i){let c=0;for(let k=0;k<i;k++)if(data.entries[k].type==='general')c++;return c}
-function move(i,d){if(data.entries[i]?.type!=='work')return;let j=i+d;if(j<0||j>=data.entries.length||data.entries[j].type==='general')return;[data.entries[i],data.entries[j]]=[data.entries[j],data.entries[i]];selectedEntry=j;save();renderList()}
+function move(i,d){
+  if(data.entries[i]?.type!=='work') return;
+  const j=i+d;
+  if(j<0 || j>=data.entries.length) return;
+  [data.entries[i],data.entries[j]]=[data.entries[j],data.entries[i]];
+  selectedEntry=j;
+  save();
+  renderList();
+}
 function openDecor(kind){if(!data.entries.length)return alert('먼저 페이지나 작품을 추가해 주세요.');let e=data.entries[selectedEntry];if(kind==='general'){if(e.type!=='general')return alert('일반 페이지를 선택해 주세요.');decorRef={img:e.img,items:e.items}}else{if(e.type!=='work')return alert('아이 작품을 선택해 주세요.');decorRef={img:kind==='orig'?e.original:e.ai,items:kind==='orig'?e.originalItems:e.aiItems}}$('#maker').style.display='none';$('#decor').style.display='block';renderDecor()}
 $('#editOrig').onclick=()=>openDecor('orig');$('#editAi').onclick=()=>openDecor('ai');
 function renderDecor(){let c=$('#canvas');c.innerHTML=`<img src="${decorRef.img}">`;selectedEl=null;decorRef.items.forEach((it,i)=>{let d=document.createElement('div');d.className='overlay '+it.type;d.textContent=it.text;d.style.left=it.x+'%';d.style.top=it.y+'%';d.style.fontSize=it.size+'px';d.dataset.i=i;makeDrag(d);d.onclick=x=>{x.stopPropagation();select(d)};c.appendChild(d)})}

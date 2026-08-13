@@ -1,15 +1,6 @@
-GitHub 업로드용 경량 E북
-
-magicpencel/
-└─ ebook/
-   ├─ index.html
-   └─ images/
-      └─ page-*.png/jpg/webp
-
-사용법
-1. GitHub의 magicpencel/ebook/ 안에 index.html을 올립니다.
-2. 같은 위치에 images 폴더를 만들고 이 ZIP의 images 안 파일을 전부 올립니다.
-3. images 폴더명과 파일명은 바꾸지 마세요.
-4. 학부모용 게시파일 생성 기능은 기존대로 사용합니다.
-
-고정 이미지들은 HTML 내부 Base64가 아니라 images/ 경로로 불러오므로 index.html 크기가 크게 줄었습니다.
+v12 수정
+- 아이 작품 ↑↓ 이동이 고정 페이지에서 막히던 문제 수정
+- 아이 작품이 고정 페이지와 자리를 바꾸며 그 사이에 들어갈 수 있음
+- 고정 페이지 자체에는 이동/삭제 버튼 없음
+- 저장 후 새로고침해도 현재 페이지 순서를 그대로 저장
+- images 폴더 구조 유지
