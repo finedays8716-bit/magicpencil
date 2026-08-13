@@ -1,7 +1,15 @@
-마술연필 E북 편집기 v9
-- 표지: 제목 자유 입력
-- 표지: '함께 만든 사람:' 라벨 고정 + 이름 자유 입력
-- 제작 안내 문구 명시:
-  '본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.'
-- 편집 화면과 완성 E북 화면에 제작 안내 표시
-- v8 저장 데이터 자동 불러오기
+GitHub 업로드용 경량 E북
+
+magicpencel/
+└─ ebook/
+   ├─ index.html
+   └─ images/
+      └─ page-*.png/jpg/webp
+
+사용법
+1. GitHub의 magicpencel/ebook/ 안에 index.html을 올립니다.
+2. 같은 위치에 images 폴더를 만들고 이 ZIP의 images 안 파일을 전부 올립니다.
+3. images 폴더명과 파일명은 바꾸지 마세요.
+4. 학부모용 게시파일 생성 기능은 기존대로 사용합니다.
+
+고정 이미지들은 HTML 내부 Base64가 아니라 images/ 경로로 불러오므로 index.html 크기가 크게 줄었습니다.
