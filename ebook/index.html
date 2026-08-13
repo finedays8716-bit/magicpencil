@@ -85,7 +85,11 @@ $('#preview').onclick=()=>{buildBook();if(!bookPages.length)return alert('표지
 
 function makeParentViewer(){
   buildBook();
-  const payload=JSON.stringify({title:data.title||'우리들의 마술연필',creator:data.className||'',pages:bookPages});
+  const parentPages=bookPages.map(p=>({
+    ...p,
+    img:(typeof p.img==='string' && p.img.startsWith('images/')) ? '../'+p.img : p.img
+  }));
+  const payload=JSON.stringify({title:data.title||'우리들의 마술연필',creator:data.className||'',pages:parentPages});
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${(data.title||'우리들의 마술연필').replace(/</g,'&lt;')}</title>
 <style>
