@@ -1,0 +1,1 @@
+이 폴더의 index.html과 pages 폴더를 GitHub의 ebook/view/에 함께 올리세요. 기존 book.pdf는 더 이상 필요하지 않습니다.
