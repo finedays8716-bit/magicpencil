@@ -1,18 +1,17 @@
-v14 - 학부모 게시 이미지 경로 수정
+v16 PDF 게시 방식
 
-원인:
-편집기는 /ebook/에 있어 images/page-xx 경로가 정상이나,
-학부모용 파일은 /ebook/view/에 올라가므로 동일한 images/page-xx 경로가
-/ebook/view/images/를 찾게 되어 그림이 전부 깨졌습니다.
+ebook/
+├─ index.html       E북 편집기
+├─ images/          고정 이미지
+└─ view/
+   ├─ index.html    PDF 페이지 넘김 학부모 뷰어
+   └─ book.pdf      편집기에서 완성 후 생성하여 여기에 업로드
 
-수정:
-학부모 게시파일 생성 시 고정 이미지 경로를 자동으로
-../images/page-xx 로 변환합니다.
+사용 순서
+1. 편집기에서 E북 완성
+2. '📄 완성 E북 PDF 만들기' 클릭 → book.pdf 다운로드
+3. GitHub ebook/view/book.pdf에 업로드/교체
+4. 학부모는 .../magicpencel/ebook/view/ 접속
+5. PC는 이전/다음 버튼, 모바일은 좌우 스와이프로 페이지 이동
 
-아이 작품은 브라우저에 업로드된 data URL이므로 그대로 게시파일에 포함됩니다.
-
-업로드:
-1. 이 v14의 ebook/index.html로 교체
-2. 기존 ebook/images/ 폴더는 그대로 유지
-3. E북 편집기에서 다시 '학부모용 E북 게시파일 만들기'
-4. 새로 생성된 index.html을 ebook/view/index.html에 덮어쓰기
+주의: PDF 생성과 PDF.js 뷰어는 CDN 라이브러리를 사용하므로 인터넷 연결이 필요합니다.
