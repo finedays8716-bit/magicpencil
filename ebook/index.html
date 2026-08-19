@@ -20,7 +20,7 @@ input[type=text],textarea{padding:10px;border:2px solid #ded1ad;border-radius:10
 <div class=card><h3>＋ 아이 작품 추가 <small>— 업로드 시 자동으로 1536×1024 이내·게시용 화질로 압축됩니다.</small></h3><div class=row><input id=name type=text placeholder="아이 이름"><label class=file>✏️ 원본 그림 선택<input id=orig type=file accept="image/*" hidden></label><span id=origTxt>선택 안 됨</span><label class=file>✨ AI 그림 선택<input id=ai type=file accept="image/*" hidden></label><span id=aiTxt>선택 안 됨</span><button class=primary id=add>＋ 작품 추가</button></div></div>
 <div class=card><h3>📑 페이지 구성 <span id="workCount" style="font-size:14px;color:#8a6d00"></span> <small>— 🔒 이야기 장면은 고정입니다. 아이 작품은 각 동물 이야기 사이에 추가할 수 있습니다.</small></h3><div id=list class=pages></div></div>
 <div class=card><h3>💬 선택한 페이지 꾸미기</h3><div class=tools><button id=editOrig>✏️ 원본에 글자/말풍선 넣기</button><button id=editAi>✨ AI 그림에 글자/말풍선 넣기</button></div><small>고정 페이지 또는 아이 작품을 선택한 뒤 편집해 주세요.</small></div>
-<div class=card style="font-size:13px;line-height:1.6"><b>ℹ️ 제작 안내</b><br>본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools><button class=primary id=preview>📖 완성된 E북 보기</button><button class=primary id=exportParent>📦 학부모용 E북 만들기</button><button class=danger id=reset>전체 초기화</button></div></div>
+<div class=card style="font-size:13px;line-height:1.6"><b>ℹ️ 제작 안내</b><br>본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=card><h3>💾 작업 백업</h3><div class=tools><button id=exportWork>💾 작업 저장하기</button><label class=file>📂 작업 불러오기<input id=importWork type=file accept="application/json,.json" hidden></label></div><small>다른 PC에서 이어서 작업하려면 작업파일(.json)을 저장한 뒤 불러오세요. 같은 PC에서는 기존 자동저장도 계속 작동합니다.</small></div><div class=tools><button class=primary id=preview>📖 완성된 E북 보기</button><button class=primary id=exportParent>📦 학부모용 E북 만들기</button><button class=danger id=reset>전체 초기화</button></div></div>
 
 <div class="wrap book" id=book><div class=shell><div id=spread class=spread></div></div><div class=nav><button id=prev>〈 이전</button><span id=count></span><button id=next>다음 〉</button></div><div style="max-width:900px;margin:8px auto 0;text-align:center;font-size:12px;color:#666;line-height:1.5">본 E북은 그림책을 활용한 독후활동 과정에서 유아의 그림과 생성형 AI를 활용하여 제작한 교육용 결과물입니다.</div><div class=tools style="justify-content:center"><button id=back>✏️ 편집으로 돌아가기</button></div></div>
 
@@ -54,6 +54,34 @@ try{
 let pending={orig:"",ai:"",general:""},selectedEntry=0,decorRef=null,selectedEl=null,bookPages=[],bookIndex=0;
 const $=s=>document.querySelector(s);
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){console.warn('브라우저 저장공간 부족: 현재 화면 작업은 유지됩니다.',e)}}
+function safeFileName(v){return String(v||'마술연필').trim().replace(/[\\/:*?"<>|]+/g,'_').replace(/\s+/g,'_').slice(0,60)||'마술연필'}
+$('#exportWork').onclick=()=>{
+  try{
+    save();
+    const payload={format:'magic-pencil-ebook',version:1,savedAt:new Date().toISOString(),data};
+    const blob=new Blob([JSON.stringify(payload)],{type:'application/json;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFileName(data.title)+'_작업파일.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  }catch(e){console.error(e);alert('작업파일 저장 중 오류: '+e.message)}
+};
+$('#importWork').onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  try{
+    const parsed=JSON.parse(await f.text());
+    const incoming=parsed&&parsed.format==='magic-pencil-ebook'?parsed.data:parsed;
+    if(!incoming||!Array.isArray(incoming.entries))throw new Error('마술연필 E북 작업파일 형식이 아닙니다.');
+    if(!confirm('현재 작업을 불러온 작업파일로 바꿀까요?')){e.target.value='';return}
+    const fresh=BUILTIN.fixed.map(x=>({type:'general',fixed:true,builtin:true,id:x.id,img:x.img,items:[]}));
+    const freshById=Object.fromEntries(fresh.map(x=>[x.id,x]));
+    const loaded=(incoming.entries||[]).map(x=>x.builtin&&freshById[x.id]?{...freshById[x.id],items:x.items||[]}:x);
+    const present=new Set(loaded.filter(x=>x.builtin).map(x=>x.id));
+    fresh.forEach(x=>{if(!present.has(x.id))loaded.push(x)});
+    data={cover:BUILTIN.cover,className:incoming.className||'',title:incoming.title||'우리들의 마술연필',end:BUILTIN.end,entries:loaded};
+    selectedEntry=0;save();
+    $('#bookTitle').value=data.title;$('#className').value=data.className;renderList();
+    alert('작업파일을 불러왔습니다.');
+  }catch(err){console.error(err);alert('작업파일을 불러오지 못했습니다: '+err.message)}
+  finally{e.target.value=''}
+};
 function fileData(file){return new Promise((ok,no)=>{
   if(!file || !file.type.startsWith('image/')) return no(new Error('이미지 파일이 아닙니다.'));
   const r=new FileReader();
