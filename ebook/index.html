@@ -6,7 +6,7 @@ h1{text-align:center}.hint{text-align:center}.card{background:#fff;border-radius
 .row,.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center}button,.file{border:0;background:#fff;border-radius:13px;padding:10px 14px;box-shadow:0 2px 8px #0002;font-weight:800;cursor:pointer}.primary{background:#ffe169}.danger{color:#a00}
 input[type=text],textarea{padding:10px;border:2px solid #ded1ad;border-radius:10px;font-size:16px}.pages{display:grid;gap:10px;margin-top:10px}.item{display:grid;grid-template-columns:50px 110px 110px 1fr auto;gap:10px;align-items:center;padding:9px;border:2px solid #eee1c3;border-radius:14px}.item.sel{border-color:#e8b900;background:#fffbea}.thumb{width:110px;aspect-ratio:3/2;object-fit:cover;border-radius:8px;background:#eee}.small{font-size:12px;text-align:center}.empty{padding:25px;text-align:center;color:#877b6a;background:#faf7ef;border-radius:12px}
 .book,.decor{display:none}.shell{max-width:1150px;margin:20px auto}.spread{position:relative;aspect-ratio:3/2;background:#fff;overflow:hidden;border-radius:10px;box-shadow:0 18px 42px #0003}.spread:not(.cover):after{content:"";position:absolute;left:50%;top:0;bottom:0;width:30px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,#0002 45%,#fff8 50%,#0002 55%,transparent);pointer-events:none}.spread img{width:100%;height:100%;object-fit:contain}.spread.cover{background:transparent;box-shadow:none;display:flex;justify-content:center;overflow:visible}.spread.cover img{width:auto;height:100%;max-width:50%;box-shadow:0 14px 34px #0003;border-radius:5px 14px 14px 5px}
-.overlay{font-family:'OngleipParkDahyeon',sans-serif;position:absolute;z-index:3;left:15%;top:15%;max-width:55%;padding:10px 14px;white-space:pre-wrap;cursor:move}.overlay.text{font-size:28px;font-weight:800;text-shadow:-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,2px 2px 0 #fff,0 2px 3px #fff}.overlay.bubble{font-size:24px;font-weight:750;background:#fff;border:3px solid #383129;border-radius:26px}.overlay.selected{outline:3px dashed #e7b800}
+.overlay{font-family:'OngleipParkDahyeon',sans-serif;position:absolute;z-index:3;left:15%;top:15%;max-width:55%;padding:10px 14px;white-space:pre-wrap;cursor:move}.overlay.text{font-size:28px;font-weight:800;color:#222;-webkit-text-stroke:2.5px #fff;paint-order:stroke fill;text-shadow:-1px -1px 1px #222,1px -1px 1px #222,-1px 1px 1px #222,1px 1px 1px #222,0 2px 3px #0008}.overlay.bubble{font-size:24px;font-weight:750;background:#fff;border:3px solid #383129;border-radius:26px}.overlay.selected{outline:3px dashed #e7b800}
 .editgrid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.canvas{position:relative;aspect-ratio:3/2;background:#fff;overflow:hidden;border-radius:15px;box-shadow:0 4px 18px #0002}.canvas img{width:100%;height:100%;object-fit:contain}.side label{display:block;font-weight:800;margin:9px 0 5px}.side textarea{width:100%;min-height:100px}.nav{text-align:center;margin:12px}.nav span{display:inline-block;min-width:90px;font-weight:850}@media(max-width:800px){.item{grid-template-columns:40px 80px 80px 1fr}.thumb{width:80px}.item .actions{grid-column:1/-1}.editgrid{grid-template-columns:1fr}}
 </style><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script></head><body>
 <div class=wrap id=maker><h1>📖 마술연필 E북 만들기</h1>
@@ -149,7 +149,7 @@ async function renderPageForParent(p){
     if(data.className){x.font="42px OngleipParkDahyeon";x.fillText('함께 만든 사람: '+data.className,W/2,185)}
   }
   for(const it of (p.items||[])){
-    const px=W*(Number(it.x)||0)/100,py=H*(Number(it.y)||0)/100,fs=Math.max(18,Number(it.size)||34);
+    const px=W*(Number(it.x)||0)/100,py=H*(Number(it.y)||0)/100,fs=Math.max(18,(Number(it.size)||34)*(W/800));
     x.font=`${fs}px OngleipParkDahyeon`;x.textBaseline='top';x.fillStyle='#222';x.strokeStyle='#fff';x.lineWidth=Math.max(4,fs*0.16);x.lineJoin='round';
     const text=String(it.text||'');
     if(it.type==='bubble'){
@@ -158,7 +158,7 @@ async function renderPageForParent(p){
       x.beginPath();
       if(x.roundRect)x.roundRect(px,py,bw,bh,24); else x.rect(px,py,bw,bh);
       x.fill();x.stroke();x.fillStyle='#222';x.fillText(text,px+pad,py+pad/2);
-    }else{x.strokeText(text,px,py);x.fillText(text,px,py);}
+    }else{x.save();x.lineJoin='round';x.miterLimit=2;x.strokeStyle='#222';x.lineWidth=Math.max(7,fs*0.24);x.strokeText(text,px,py);x.strokeStyle='#fff';x.lineWidth=Math.max(5,fs*0.16);x.strokeText(text,px,py);x.fillStyle='#222';x.fillText(text,px,py);x.restore();}
   }
   return await new Promise(ok=>c.toBlob(ok,'image/jpeg',0.86));
 }
