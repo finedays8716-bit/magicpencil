@@ -8,7 +8,7 @@ input[type=text],textarea{padding:10px;border:2px solid #ded1ad;border-radius:10
 .book,.decor{display:none}.shell{max-width:1150px;margin:20px auto}.spread{position:relative;aspect-ratio:3/2;background:#fff;overflow:hidden;border-radius:10px;box-shadow:0 18px 42px #0003}.spread:not(.cover):after{content:"";position:absolute;left:50%;top:0;bottom:0;width:30px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,#0002 45%,#fff8 50%,#0002 55%,transparent);pointer-events:none}.spread img{width:100%;height:100%;object-fit:contain}.spread.cover{background:transparent;box-shadow:none;display:flex;justify-content:center;overflow:visible}.spread.cover img{width:auto;height:100%;max-width:50%;box-shadow:0 14px 34px #0003;border-radius:5px 14px 14px 5px}
 .overlay{font-family:'OngleipParkDahyeon',sans-serif;position:absolute;z-index:3;left:15%;top:15%;max-width:55%;padding:10px 14px;white-space:pre-wrap;cursor:move}.overlay.text{font-size:28px;font-weight:800;color:#111;-webkit-text-stroke:3px #fff;paint-order:stroke fill;text-shadow:none}.overlay.bubble{font-size:24px;font-weight:750;background:#fff;border:3px solid #383129;border-radius:26px;max-width:60%;overflow-wrap:anywhere;word-break:keep-all}.overlay.selected{outline:3px dashed #e7b800}
 .editgrid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}.canvas{position:relative;aspect-ratio:3/2;background:#fff;overflow:hidden;border-radius:15px;box-shadow:0 4px 18px #0002}.canvas img{width:100%;height:100%;object-fit:contain}.side label{display:block;font-weight:800;margin:9px 0 5px}.side textarea{width:100%;min-height:100px}.nav{text-align:center;margin:12px}.nav span{display:inline-block;min-width:90px;font-weight:850}@media(max-width:800px){.item{grid-template-columns:40px 80px 80px 1fr}.thumb{width:80px}.item .actions{grid-column:1/-1}.editgrid{grid-template-columns:1fr}}
-</style><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script></head><body>
+</style><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script></head><body>
 <div class=wrap id=maker><h1>📖 마술연필 E북 만들기</h1>
 <p class=hint>표지·동물 만남 장면·마지막 장면은 기본 페이지로 고정되어 있습니다. 아이 작품만 사이사이에 추가하세요.</p>
 <p class=hint style="font-weight:800;color:#7a6500">📐 아이 작품 권장 이미지 크기: 1536 × 1024 px (가로 3:2)</p>
@@ -138,47 +138,41 @@ $('#preview').onclick=()=>{buildBook();if(!bookPages.length)return alert('표지
 
 async function loadImg(src){return await new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=src})}
 async function renderPageForParent(p){
-  const W=1536,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;
-  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
-  const im=await loadImg(p.img);
-  const r=Math.min(W/im.naturalWidth,H/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;
-  x.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh);
   if(p.kind==='cover'){
-    x.textAlign='center';x.fillStyle='#302b25';
+    const W=1536,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
+    const im=await loadImg(p.img);
+    const r=Math.min(W/im.naturalWidth,H/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;
+    x.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh);
+    x.textAlign='center';x.fillStyle='#302b25';x.textBaseline='alphabetic';
     x.font="72px OngleipParkDahyeon";x.fillText(data.title||'우리들의 마술연필',W/2,120);
     if(data.className){x.font="42px OngleipParkDahyeon";x.fillText('함께 만든 사람: '+data.className,W/2,185)}
+    return await new Promise(ok=>c.toBlob(ok,'image/jpeg',0.9));
   }
+  if(!window.html2canvas)throw new Error('화면 캡처 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+  const stage=document.createElement('div');
+  stage.className='canvas';
+  stage.style.cssText='position:fixed;left:-10000px;top:0;width:920px;height:613.333333px;display:block;background:#fff;overflow:hidden;border-radius:0;box-shadow:none;z-index:-9999;';
+  const img=document.createElement('img');
+  img.src=p.img;img.style.cssText='width:100%;height:100%;object-fit:contain;display:block;';
+  stage.appendChild(img);
   for(const it of (p.items||[])){
-    const px=W*(Number(it.x)||0)/100,py=H*(Number(it.y)||0)/100,fs=Math.max(18,(Number(it.size)||34)*(W/920));
-    x.font=`${fs}px OngleipParkDahyeon`;x.textBaseline='top';x.fillStyle='#222';x.strokeStyle='#fff';x.lineWidth=Math.max(4,fs*0.16);x.lineJoin='round';
-    const text=String(it.text||'');
-    if(it.type==='bubble'){
-      const pad=Math.max(18,fs*.55),safe=24,maxBW=Math.min(W*.62,W-px-safe);
-      const words=text.split(/\s+/),lines=[];let line='';
-      for(const word of words){
-        const test=line?line+' '+word:word;
-        if(x.measureText(test).width>maxBW-pad*2 && line){lines.push(line);line=word}else line=test;
-      }
-      if(line)lines.push(line);
-      const lineH=fs*1.22;
-      let widest=0;for(const ln of lines)widest=Math.max(widest,x.measureText(ln).width);
-      const bw=Math.min(maxBW,Math.max(fs*4,widest+pad*2));
-      const bh=Math.max(fs*1.6+pad,lines.length*lineH+pad*1.35);
-      const bx=Math.min(px,W-bw-safe),by=Math.min(py,H-bh-safe);
-      x.fillStyle='#fff';x.strokeStyle='#333';x.lineWidth=Math.max(3,fs*.07);
-      x.beginPath();
-      if(x.roundRect)x.roundRect(bx,by,bw,bh,Math.max(20,fs*.55)); else x.rect(bx,by,bw,bh);
-      x.fill();x.stroke();x.fillStyle='#222';
-      lines.forEach((ln,j)=>x.fillText(ln,bx+pad,by+pad*.55+j*lineH));
-    }else{
-      x.save();x.lineJoin='round';x.miterLimit=2;
-      x.strokeStyle='#fff';x.lineWidth=Math.max(6,fs*0.18);
-      x.strokeText(text,Math.min(px,W-24),Math.min(py,H-fs-24));
-      x.fillStyle='#111';x.fillText(text,Math.min(px,W-24),Math.min(py,H-fs-24));
-      x.restore();
-    }
+    const d=document.createElement('div');
+    d.className='overlay '+it.type;
+    d.textContent=String(it.text||'');
+    d.style.left=(Number(it.x)||0)+'%';
+    d.style.top=(Number(it.y)||0)+'%';
+    d.style.fontSize=(Number(it.size)||28)+'px';
+    d.style.cursor='default';
+    stage.appendChild(d);
   }
-  return await new Promise(ok=>c.toBlob(ok,'image/jpeg',0.86));
+  document.body.appendChild(stage);
+  try{
+    await new Promise((ok,no)=>{if(img.complete&&img.naturalWidth)return ok();img.onload=ok;img.onerror=no});
+    try{await document.fonts.load("28px OngleipParkDahyeon");await document.fonts.ready}catch(e){}
+    const shot=await html2canvas(stage,{backgroundColor:'#ffffff',scale:1536/920,width:920,height:613.333333,useCORS:true,allowTaint:false,logging:false});
+    return await new Promise(ok=>shot.toBlob(ok,'image/jpeg',0.9));
+  }finally{stage.remove()}
 }
 function parentViewerHtml(pageCount,title){
 return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${String(title||'우리들의 마술연필').replace(/</g,'&lt;')}</title>
